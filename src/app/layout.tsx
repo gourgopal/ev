@@ -54,8 +54,16 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-        <div className="flex flex-col min-h-screen relative">
-          <div className="flex-1 pb-24">
+        <div className="flex min-h-screen relative max-w-[1600px] mx-auto">
+          
+          {/* Left Ad Banner (Hidden on smaller screens) */}
+          <div className="hidden 2xl:flex w-[300px] flex-col items-center justify-start pt-24 px-4 sticky top-0 h-screen shrink-0">
+             <div className="w-full h-[600px] bg-[var(--card-bg)] border border-[var(--glass-border)] rounded-xl flex items-center justify-center text-[var(--muted-foreground)] text-sm shadow-sm text-center p-4">
+                Left Ad Space<br/>(160x600 or 300x600)
+             </div>
+          </div>
+
+          <div className="flex-1 flex flex-col pb-24 min-w-0 w-full">
             {/* Top Ad Space Placeholder */}
             <div className="w-full max-w-4xl mx-auto h-20 bg-[var(--card-bg)] border border-[var(--glass-border)] rounded-xl my-4 flex items-center justify-center text-[var(--muted-foreground)] text-sm shadow-sm hidden md:flex">
                <span>Ad Space Placeholder (728x90)</span>
@@ -67,6 +75,13 @@ export default function RootLayout({
             <div className="w-full max-w-4xl mx-auto h-20 bg-[var(--card-bg)] border border-[var(--glass-border)] rounded-xl my-4 mt-12 flex items-center justify-center text-[var(--muted-foreground)] text-sm shadow-sm">
                <span>Ad Space Placeholder (Responsive)</span>
             </div>
+          </div>
+
+          {/* Right Ad Banner (Hidden on smaller screens) */}
+          <div className="hidden 2xl:flex w-[300px] flex-col items-center justify-start pt-24 px-4 sticky top-0 h-screen shrink-0">
+             <div className="w-full h-[600px] bg-[var(--card-bg)] border border-[var(--glass-border)] rounded-xl flex items-center justify-center text-[var(--muted-foreground)] text-sm shadow-sm text-center p-4">
+                Right Ad Space<br/>(160x600 or 300x600)
+             </div>
           </div>
           
           {/* Floating Navigation */}

@@ -246,14 +246,6 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
-      {Number(startSoc) < 20 && (
-        <div className="mb-6 p-3 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-600 dark:text-orange-400 flex gap-2 items-center text-sm animate-in slide-in-from-top-2 fade-in max-w-2xl mx-auto">
-          <AlertTriangle className="shrink-0 h-4 w-4" />
-          <p>
-            <strong>Low Battery (Voltage Sag):</strong> Driving below 20% causes voltage sag, reducing actual range.
-          </p>
-        </div>
-      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
@@ -614,25 +606,39 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
                  </div>
               </div>
 
-              {/* ICE Savings */}
-              <div className="bg-[var(--card-bg)] border border-[var(--glass-border)] p-5 rounded-xl shadow-inner relative overflow-hidden">
-                <div className="absolute -right-4 -top-4 opacity-10">
-                  <TrendingDown className="w-24 h-24 text-green-500" />
+              {/* ICE Savings & CO2 Emissions */}
+              <div className="grid grid-cols-2 gap-4">
+                {/* ICE Savings */}
+                <div className="bg-[var(--card-bg)] border border-[var(--glass-border)] p-5 rounded-xl shadow-inner relative overflow-hidden">
+                  <div className="absolute -right-4 -top-4 opacity-10">
+                    <TrendingDown className="w-24 h-24 text-green-500" />
+                  </div>
+                  <h3 className="font-semibold text-[var(--muted-foreground)] flex items-center gap-2 mb-3">
+                    <Fuel className="w-4 h-4" /> ICE Comparison
+                  </h3>
+                  {result.savings > 0 ? (
+                    <>
+                      <p className="text-3xl font-bold text-green-500 font-mono mb-1">+{currency}{Math.round(result.savings)}</p>
+                      <p className="text-xs text-[var(--muted-foreground)]">Saved compared to driving {Math.round(result.rangeGained)} {rangeUnit} in an ICE vehicle.</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-3xl font-bold text-red-500 font-mono mb-1">{currency}{Math.round(result.savings)}</p>
+                      <p className="text-xs text-[var(--muted-foreground)]">EV Charging is more expensive for this session.</p>
+                    </>
+                  )}
                 </div>
-                <h3 className="font-semibold text-[var(--muted-foreground)] flex items-center gap-2 mb-3">
-                  <Fuel className="w-4 h-4" /> ICE Comparison
-                </h3>
-                {result.savings > 0 ? (
-                  <>
-                    <p className="text-4xl font-bold text-green-500 font-mono mb-2">+{currency}{Math.round(result.savings)}</p>
-                    <p className="text-sm text-[var(--muted-foreground)]">Saved compared to driving the same {Math.round(result.rangeGained)} {rangeUnit} in an ICE vehicle (which would cost {currency}{Math.round(result.iceCost)}).</p>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-4xl font-bold text-red-500 font-mono mb-2">{currency}{Math.round(result.savings)}</p>
-                    <p className="text-sm text-[var(--muted-foreground)]">EV Charging is currently more expensive than ICE fuel for this session.</p>
-                  </>
-                )}
+
+                {/* CO2 Emissions */}
+                <div className="bg-[var(--card-bg)] border border-[var(--glass-border)] p-5 rounded-xl shadow-inner relative overflow-hidden flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-semibold text-[var(--muted-foreground)] flex items-center gap-2 mb-3">
+                      <svg className="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> CO₂ Saved
+                    </h3>
+                    <p className="text-3xl font-bold text-emerald-500 font-mono mb-1">{(result.rangeGained * (rangeUnit === 'km' ? 0.12 : 0.19)).toFixed(1)} kg</p>
+                  </div>
+                  <p className="text-xs text-[var(--muted-foreground)] mt-2">Tailpipe emissions prevented.</p>
+                </div>
               </div>
 
               {/* EV Insights - Educational Space Fill */}
@@ -689,6 +695,14 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
               <div className="flex-grow" />
 
               <div className="fixed md:static bottom-0 left-0 right-0 z-50 md:z-auto bg-background/95 md:bg-transparent backdrop-blur-xl md:backdrop-blur-none border-t border-[var(--glass-border)] md:border-t p-4 md:p-0 mt-4 md:pt-4 flex flex-col gap-3 shadow-[0_-10px_30px_rgba(0,0,0,0.3)] md:shadow-none">
+                {Number(startSoc) < 20 && (
+                  <div className="mb-2 p-2 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-600 dark:text-orange-400 flex gap-2 items-center text-xs animate-in slide-in-from-bottom-2 fade-in">
+                    <AlertTriangle className="shrink-0 h-4 w-4" />
+                    <p>
+                      <strong>Low Battery (Voltage Sag):</strong> Driving below 20% causes voltage sag, reducing actual range.
+                    </p>
+                  </div>
+                )}
                 <div className="flex justify-between items-center px-1">
                    <label className="text-sm font-medium text-[var(--muted-foreground)]">Simulation Speed</label>
                    <div className="flex gap-4 items-center">
