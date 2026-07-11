@@ -31,9 +31,9 @@ type ChargeHistoryItem = {
   rangeGained: number;
 };
 
-export default function EVChargingCalculator() {
-  const [capacity, setCapacity] = useState<number | string>(40.5);
-  const [customRange, setCustomRange] = useState<number | string>(263);
+export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCar }) {
+  const [capacity, setCapacity] = useState<number | string>(initialCar?.capacity || 40.5);
+  const [customRange, setCustomRange] = useState<number | string>(initialCar?.range || 263);
   const [startSoc, setStartSoc] = useState<number | string>(10);
   const [endSoc, setEndSoc] = useState<number | string>(100);
   const [chargerKw, setChargerKw] = useState<number | string>(7.2);
@@ -41,7 +41,9 @@ export default function EVChargingCalculator() {
   const [curveType, setCurveType] = useState<"conservative" | "aggressive" | "linear">("conservative");
 
   // Advanced State
-  const [whPerKm, setWhPerKm] = useState<number | string>(154);
+  const [whPerKm, setWhPerKm] = useState<number | string>(
+     initialCar ? Math.round((initialCar.capacity * 1000) / initialCar.range) : 154
+  );
   const [simSpeed, setSimSpeed] = useState<number>(1);
 
   // Economics
@@ -53,7 +55,7 @@ export default function EVChargingCalculator() {
   // Searchable Dropdown State
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCar, setSelectedCar] = useState<EVCar | null>(null);
+  const [selectedCar, setSelectedCar] = useState<EVCar | null>(initialCar || null);
   
   // Advanced Settings State
   const [showAdvanced, setShowAdvanced] = useState(false);

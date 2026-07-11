@@ -1,0 +1,111 @@
+Country/Region,Brand Name,Car Model,Year of Manufacturing,Battery Type,Battery Capacity (kWh),Charging Time (Slow),Charging Time (Fast),Reviews,Range (km/miles),Important Details
+India,Tata,Nexon.ev LR,2023,LFP,40.5,15 hours (3.3kW),56 mins (50kW),8.5/10,465 km,"India's best-selling EV, updated with new gen-2 motor."
+India,Tata,Tiago.ev,2022,LFP,24,8.7 hours (3.3kW),58 mins (DC),8.0/10,315 km,Affordable entry-level EV hatchback.
+India,Tata,Tigor.ev,2021,LFP,26,9.4 hours,59 mins,7.5/10,315 km,Compact electric sedan popular in fleet and private use.
+India,Tata,Punch.ev,2024,LFP,35,13.5 hours,56 mins,8.8/10,421 km,First Tata EV on the pure EV acti.ev platform.
+India,Tata,Curvv.ev,2024,LFP,55,11 hours (7.2kW),40 mins (DC),8.6/10,585 km,Coupe-SUV styling with V2L and V2V tech.
+India,Tata,Harrier.ev,2025,LFP Liquid Cooled,75,9.3 hours,25 mins,9.0/10,627 km,AWD capability built on acti.ev Plus architecture.
+India,Tata,Sierra.ev,2026,LFP,75,9.5 hours,30 mins,8.9/10,550 km,Reborn iconic SUV with modern minimalist design.
+India,Mahindra,XUV400,2023,NMC,39.4,13 hours,50 mins,8.0/10,456 km,Fastest C-segment EV SUV in India at launch.
+India,Mahindra,BE 6e,2025,LFP (INGLO),79,6 hours (11kW),20 mins (180kW),8.8/10,682 km,"Aggressive styling, RWD 286hp, born-EV architecture."
+India,Mahindra,XEV 9e,2025,LFP (INGLO),79,6 hours,20 mins,8.7/10,650 km,"Triple screen layout, premium flagship luxury SUV."
+India,Mahindra,BE.09,2026,LFP,80,6.5 hours,22 mins,N/A,670 km,Grand-touring styled multi-motor premium coupe SUV.
+India,Mahindra,XUV.e8,2025,LFP,80,7 hours,25 mins,N/A,600 km,Electric version of the popular XUV700.
+India,Mahindra,XUV.e9,2025,LFP,80,7 hours,25 mins,N/A,600 km,Coupe-styled sibling to the XUV.e8.
+India,Hyundai,Creta EV,2026,Lithium-ion,51.4,4.8 hours (11kW),58 mins,9.1/10,510 km,Highly anticipated mass-market electrification of top SUV.
+India,Maruti Suzuki,eVitara,2026,LFP Blade,61,9 hours,45 mins,8.6/10,543 km,"Standard 7 airbags, Suzuki-Toyota global collaboration."
+India,MG,ZS EV,2020,LFP,50.3,16 hours (3.3kW),60 mins,8.4/10,461 km,Early successful premium EV in India with panoramic sunroof.
+India,MG,Comet EV,2023,LFP,17.3,7 hours,N/A (No DC),7.8/10,230 km,"Compact urban commuter, tech-loaded interior."
+India,MG,Windsor EV,2024,LFP,38,12 hours,55 mins,8.5/10,331 km,Introduced BaaS (Battery as a Service) pay-per-km model.
+India,BYD,Seal (India Spec),2024,LFP Blade,82.5,12 hours,37 mins (150kW),9.2/10,650 km,"High-performance aerodynamic sedan, incredible value for money."
+India,Citroen,eC3,2023,LFP,29.2,10.5 hours,57 mins,7.5/10,320 km,"Comfort-oriented suspension, basic feature list."
+India,Citroen,eC3 Aircross,2026,LFP,40,12 hours,55 mins,N/A,400 km,Upcoming multi-seater EV SUV based on C3 Aircross.
+India,Kia,EV6 (India Spec),2022,NMC,77.4,7.5 hours (11kW),18 mins (350kW),9.3/10,708 km (ARAI),Imported flagship 800V architecture crossover.
+India,Kia,Carens EV,2026,LFP,45,10 hours,45 mins,N/A,400 km,Electric version of the popular 3-row RV.
+India,Skoda,Enyaq iV,2025,NMC,77,7.5 hours,36 mins,8.8/10,510 km,Skoda's premium MEB-platform SUV entering the Indian market.
+India,Volvo,XC40 Recharge,2022,NMC,78,8 hours,33 mins,8.7/10,418 km,Locally assembled luxury EV with robust safety features.
+USA,Tesla,Model 3 LR RWD,2024,NMC,82,10 hours,25 mins,9.1/10,363 miles,Highland refresh with improved suspension and cabin quietness.
+USA,Tesla,Model Y Juniper,2025,NMC/LFP,82,10 hours,25 mins,9.3/10,330 miles,Expected major aesthetic and interior upgrade for best-seller.
+USA,Tesla,Model S Plaid,2021,NCA,100,12 hours,27 mins,9.5/10,359 miles,"Tri-motor 1020 hp setup, yoke steering option."
+USA,Tesla,Model X Plaid,2021,NCA,100,12 hours,27 mins,9.0/10,333 miles,"Falcon wing doors, fastest accelerating SUV."
+USA,Tesla,Cybertruck Cyberbeast,2024,4680,123,14 hours,40 mins,8.5/10,320 miles,"Stainless steel exoskeleton, steer-by-wire system."
+USA,Tesla,Roadster Gen 2,2027,Advanced Li-ion,200,20 hours,45 mins,N/A,620 miles,"Delayed hypercar, promised sub-1.9s 0-60mph."
+USA,Rivian,R1T Dual Motor,2023,NMC,135,13 hours,45 mins,9.2/10,352 miles,Highly capable off-road electric truck with gear tunnel.
+USA,Rivian,R1S Quad Motor,2022,NMC,135,13 hours,45 mins,9.1/10,321 miles,7-seater luxury adventure SUV.
+USA,Rivian,R2,2026,4695 Cylindrical,85,8 hours,20 mins,N/A,300+ miles,"Mass-market 5-seater SUV starting at $45,000."
+USA,Rivian,R3X,2027,4695 Cylindrical,70,7 hours,20 mins,N/A,300 miles,Rally-inspired compact crossover.
+USA,Lucid,Air Grand Touring,2022,NMC,112,10 hours,21 mins,9.4/10,516 miles,"900V architecture, exceptional aerodynamic efficiency."
+USA,Lucid,Air Sapphire,2023,NMC,118,11 hours,21 mins,9.7/10,427 miles,"Tri-motor setup, 1234 hp, fastest production sedan."
+USA,Lucid,Gravity,2025,NMC,120,11 hours,20 mins,9.2/10,440 miles,"Spacious luxury SUV, extremely compact custom motors."
+USA,Ford,F-150 Lightning ER,2022,NMC,131,10 hours (80A),41 mins,8.9/10,320 miles,Features Pro Power Onboard to run tools and homes.
+USA,Ford,Mustang Mach-E GT,2021,NMC,91,10 hours,45 mins,8.5/10,270 miles,Sporty crossover borrowing Mustang design cues.
+USA,Chevrolet,Blazer EV,2023,Ultium,85,9 hours,35 mins,8.2/10,279 miles,"Offered in FWD, RWD, and AWD variants on Ultium platform."
+USA,Chevrolet,Silverado EV RST,2024,Ultium,205,20 hours (11kW),40 mins (350kW),8.8/10,440 miles,"Massive battery pack, 4-wheel steer capability."
+USA,Chevrolet,Equinox EV,2024,Ultium,85,9 hours,45 mins,8.4/10,319 miles,Priced as an affordable midsize electric SUV.
+USA,Chevrolet,Bolt EV (Discontinued/Refresh),2023,Li-ion,65,7 hours,60 mins (50kW limit),8.1/10,259 miles,Classic budget EV; new Ultium version planned.
+USA,Cadillac,Lyriq,2023,Ultium,102,10 hours,40 mins,8.5/10,314 miles,"Bold styling, 33-inch diagonal curved LED display."
+USA,Cadillac,Escalade IQ,2025,Ultium,200+,15 hours,45 mins,8.9/10,460 miles,Huge luxury electric flagship SUV with 55-inch display.
+USA,GMC,Hummer EV Pickup,2022,Ultium,212,16 hours (19.2kW),45 mins,8.3/10,329 miles,"CrabWalk feature, Watts to Freedom mode (0-60 in 3s)."
+USA,Dodge,Charger Daytona SRT,2025,NMC,100.5,10 hours,27 mins,8.7/10,317 miles,First electric muscle car with 'Fratzonic' simulated exhaust.
+USA,Fisker,Ocean,2023,NMC,113,12 hours,35 mins,7.5/10,360 miles,Features a solar roof; company currently faces bankruptcy.
+Canada,Project Arrow,APV,2025,Cylindrical Li-ion,82,9 hours,35 mins,N/A,500 km,All-Canadian conceptual collaborative tech showcase.
+Germany,Volkswagen,ID.3,2020,NMC,58,6 hours,35 mins,8.0/10,426 km,Core European electric hatchback on the MEB platform.
+Germany,Volkswagen,ID.4,2021,NMC,77,7.5 hours,30 mins,8.1/10,522 km,"Global family SUV, widely available across continents."
+Germany,Volkswagen,ID.7,2024,NMC,86,8.5 hours,28 mins,8.5/10,700 km,Highly aerodynamic flagship electric sedan.
+Germany,Volkswagen,ID.Buzz,2022,NMC,77,7.5 hours,30 mins,8.8/10,423 km,Retro-styled electric microbus inspired by the Type 2.
+Germany,Audi,Q4 e-tron,2021,NMC,77,7.5 hours,29 mins,8.3/10,511 km,Premium compact SUV sibling to the VW ID.4.
+Germany,Audi,Q8 e-tron,2023,NMC,106,11.5 hours,31 mins,8.4/10,582 km,Refreshed original e-tron with larger battery capacity.
+Germany,Audi,e-tron GT,2021,NMC,83.7,9.5 hours,22.5 mins,9.1/10,487 km,Sister car to the Porsche Taycan with 800V charging.
+Germany,Audi,A6 e-tron,2025,NMC (PPE),94.9,10 hours,21 mins,8.9/10,750 km,"Built on the Premium Platform Electric (PPE), sleek design."
+Germany,Porsche,Taycan Turbo,2020,NMC,93.4,9 hours,22.5 mins,9.4/10,450 km,Benchmark for EV handling and continuous performance.
+Germany,Porsche,Macan EV,2024,NMC (PPE),95,10 hours,21 mins (270kW),9.2/10,613 km,Sporty electric compact SUV replacing the ICE Macan.
+Germany,Porsche,718 Cayman EV,2026,NMC,80,8 hours,20 mins,N/A,400 km,Mid-engine layout simulation for pure electric sports car handling.
+Germany,BMW,i4 eDrive40,2021,NMC,80.7,8.5 hours,31 mins,8.9/10,590 km,Excellent traditional sedan dynamics and UI.
+Germany,BMW,i5 M60,2023,NMC,81.2,8.5 hours,30 mins,8.8/10,516 km,601 hp electric executive performance sedan.
+Germany,BMW,i7 xDrive60,2022,NMC,101.7,10.5 hours,34 mins,9.0/10,625 km,Features the 31.3-inch rear Theatre Screen.
+Germany,BMW,iX3 (Neue Klasse),2025,Gen 6 Cylindrical,90,7 hours,15 mins,9.2/10,600 km,First vehicle on BMW's dedicated clean-sheet EV platform.
+Germany,Mercedes-Benz,EQE Sedan,2022,NMC,90.6,9.5 hours,32 mins,8.5/10,618 km,E-Class electric equivalent with 'jellybean' aero styling.
+Germany,Mercedes-Benz,EQS Sedan,2021,NMC,107.8,11.5 hours,31 mins,8.7/10,770 km,Flagship luxury EV with the massive Hyperscreen dashboard.
+Germany,Mercedes-Benz,G580 (EQG),2024,NMC,116,12 hours,32 mins,8.9/10,473 km,Electric G-Wagon featuring quad motors and G-Turn (tank turn).
+UK,Jaguar,I-PACE,2018,Li-ion,90,13 hours,45 mins,8.5/10,470 km,"Early luxury EV pioneer, won World Car of the Year."
+UK,Mini,Cooper Electric,2024,NMC,49.2 (SE),5.5 hours,30 mins,8.6/10,402 km,New generation with vastly improved range and circular OLED UI.
+UK,Lotus,Eletre,2023,NMC,112,12 hours,20 mins,8.8/10,600 km,"Hyper-SUV built in China, up to 905 hp."
+UK,Rolls-Royce,Spectre,2023,NMC,102,11 hours,34 mins,9.5/10,530 km,Ultra-luxury electric coupe replacing the Wraith.
+EU,Renault,5 E-Tech,2025,NMC,52,4.5 hours (11kW),30 mins,8.8/10,400 km,Retro-futuristic mass market electric city hatchback.
+EU,Peugeot,e-208,2020,Li-ion,50,7.5 hours,30 mins,8.2/10,362 km,Stylish and dynamic European B-segment hatchback.
+EU,Fiat,500e,2021,Li-ion,42,6 hours,35 mins,8.4/10,320 km,Iconic city car perfect for tight European streets.
+China,BYD,Atto 3,2022,LFP Blade,60.4,9.5 hours,45 mins,8.7/10,420 km,Global expansion leader with gym-inspired quirky interior.
+China,BYD,Seal,2022,LFP Blade,82.5,12 hours,37 mins,9.0/10,650 km,Tesla Model 3 competitor with cell-to-body architecture.
+China,BYD,Dolphin,2021,LFP Blade,44.9,7 hours,40 mins,8.5/10,340 km,Highly affordable and efficient electric hatchback.
+China,BYD,Han EV,2020,LFP Blade,85.4,12 hours,30 mins,8.9/10,605 km,Premium flagship sedan popular in domestic market.
+China,BYD,Seagull,2023,LFP Blade,38.8,6 hours,30 mins,8.6/10,405 km (CLTC),Ultra-budget city car disrupting entry-level segments globally.
+China,BYD,Yangwang U8,2023,LFP Blade (EREV),49,7 hours,18 mins,9.0/10,1000 km (combined),Luxury off-roader (EREV) with tank turn and floating capabilities.
+China,Xiaomi,SU7,2024,LFP / NMC (CATL),101,11 hours,19 mins,9.3/10,800 km,"Tech giant's first car, seamless HyperOS integration."
+China,Xiaomi,SU7 Ultra,2025,CATL Qilin 2.0,93.7,10 hours,12 mins,9.6/10,800 km,"1548 hp, sub 2-second 0-100km/h track monster."
+China,Xiaomi,MX11 (SUV),2026,NMC,100,10 hours,15 mins,N/A,700 km,Upcoming premium electric SUV to challenge Model Y.
+China,NIO,ET7,2022,Solid State / NMC,150,14 hours,Swappable (3 mins),9.1/10,1000 km,Flagship sedan utilizing automated battery swap stations.
+China,NIO,ES6,2023,NMC,100,10 hours,Swappable (3 mins),8.8/10,625 km,"Premium mid-size SUV, best-seller for NIO."
+China,NIO,ET5,2022,NMC,75,8 hours,Swappable (3 mins),8.9/10,560 km,Model 3 rival with beautiful interior and swapping tech.
+China,XPeng,G9,2022,NMC,98,10 hours,15 mins (800V),8.9/10,702 km,Ultra-fast charging SUV with advanced ADAS (XNGP).
+China,XPeng,P7i,2023,NMC,86.2,9 hours,29 mins,8.7/10,702 km,"Sleek sedan, refreshed with better tech and performance."
+China,Zeekr,001,2021,NMC (Kirin),140,14 hours,28 mins,9.0/10,1032 km,Geely-backed luxury shooting brake with massive battery option.
+China,Zeekr,X,2023,NMC,66,7 hours,30 mins,8.6/10,440 km,Premium urban compact SUV sharing platform with Volvo EX30.
+China,Zeekr,009,2023,NMC,140,14 hours,28 mins,8.8/10,822 km,Ultra-luxury electric MPV/minivan with Rolls-Royce like grille.
+China,Polestar,Polestar 2,2020,NMC,82,8.5 hours,28 mins,8.7/10,654 km,Switched from FWD to RWD in its mid-cycle refresh.
+China,Polestar,Polestar 3,2024,NMC,111,11 hours,30 mins,8.9/10,610 km,Aerodynamic premium SUV sharing platform with Volvo EX90.
+China,Wuling,Hongguang Mini EV,2020,LFP,13.8,9 hours,N/A,7.5/10,170 km,Micro-EV that outsold Tesla in China due to extreme affordability.
+South Korea,Hyundai,Ioniq 5,2021,NMC,77.4,7.5 hours,18 mins (800V),9.3/10,507 km,"Retro-modern design, V2L, multi-award winner globally."
+South Korea,Hyundai,Ioniq 5 N,2024,NMC,84,8 hours,18 mins (800V),9.6/10,448 km,High-performance EV with simulated gearshifts and engine sound.
+South Korea,Hyundai,Ioniq 6,2023,NMC,77.4,7.5 hours,18 mins,9.0/10,614 km,Streamliner sedan styling resulting in exceptional efficiency.
+South Korea,Hyundai,Ioniq 9,2025,NMC,100,10 hours,24 mins,N/A,540 km,Upcoming three-row flagship electric SUV.
+South Korea,Hyundai,Kona Electric,2024,NMC,65.4,6.5 hours,41 mins,8.5/10,490 km,Second generation with more space and futuristic light bar.
+South Korea,Kia,EV6,2021,NMC,77.4,7.5 hours,18 mins,9.2/10,528 km,"Sporty sister car to Ioniq 5, excellent handling."
+South Korea,Kia,EV9,2023,NMC,99.8,9.5 hours,24 mins,9.4/10,541 km,"Blocky, practical, well-priced three-row family EV SUV."
+South Korea,Kia,EV3,2024,NMC,81.4,8 hours,31 mins,8.7/10,600 km,Compact EV SUV designed to bring EV9 styling to the masses.
+South Korea,Kia,Niro EV,2022,Li-ion,64.8,6.5 hours,43 mins,8.4/10,460 km,Practical front-wheel-drive family crossover.
+South Korea,Genesis,GV60,2022,NMC,77.4,7.5 hours,18 mins,8.9/10,470 km,Luxury E-GMP platform vehicle with Crystal Sphere shifter.
+South Korea,Genesis,Electrified G80,2022,NMC,87.2,8.5 hours,22 mins,8.8/10,520 km,Traditional luxury sedan with a silent electric powertrain.
+Japan,Nissan,Ariya,2022,NMC,87,13.5 hours,35 mins,8.5/10,530 km,Nissan's premium step up from the Leaf with lounge-like interior.
+Japan,Nissan,Leaf (Gen 2),2018,Li-ion,62,11 hours,60 mins (CHAdeMO),7.9/10,385 km,"One of the first mass-market EVs, aging CHAdeMO standard."
+Japan,Toyota,bZ4X,2022,Li-ion,71.4,9.5 hours,30 mins,7.5/10,516 km,"Toyota's first dedicated global EV, co-developed with Subaru."
+Japan,Honda,Prologue,2024,Ultium,85,9 hours,35 mins,8.1/10,476 km,Mid-size SUV built in partnership with General Motors.
