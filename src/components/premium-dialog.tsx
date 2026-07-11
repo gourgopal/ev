@@ -87,7 +87,7 @@ export function PremiumDialog({ isOpen, onClose }: PremiumDialogProps) {
           {/* Premium Section */}
           <div className={`p-5 rounded-xl border ${isPremium ? 'bg-amber-500/10 border-amber-500/30' : 'bg-[var(--background)] border-[var(--glass-border)]'}`}>
             <h4 className="font-bold flex items-center gap-2 mb-2">
-              <Zap className={isPremium ? "text-amber-500" : "text-[var(--muted-foreground)]"} w={18} h={18} /> 
+              <Zap className={isPremium ? "text-amber-500" : "text-[var(--muted-foreground)]"} width={18} height={18} /> 
               {isPremium ? "EV-Time PRO Active" : "Upgrade to PRO"}
             </h4>
             
