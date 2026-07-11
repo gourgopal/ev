@@ -198,7 +198,7 @@ function TCOContent() {
                       <YAxis stroke="var(--muted-foreground)" fontSize={12} tickFormatter={(val) => `${currency}${(val/100000).toFixed(1)}L`} />
                       <Tooltip 
                         contentStyle={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--glass-border)', borderRadius: '0.5rem' }}
-                        formatter={(value: number) => [`${currency}${value.toLocaleString()}`, undefined]}
+                        formatter={(value: any) => [`${currency}${Number(value).toLocaleString()}`, undefined]}
                       />
                       <Legend />
                       <Line type="monotone" dataKey="EV Cost" stroke="var(--primary)" strokeWidth={4} dot={false} activeDot={{ r: 8 }} />
