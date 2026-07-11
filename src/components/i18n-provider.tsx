@@ -54,8 +54,12 @@ type I18nContextType = {
 
 const I18nContext = createContext<I18nContextType | undefined>(undefined);
 
+import { Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
+
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [locale, setLocale] = useState<Language>("en");
+  const { theme, setTheme } = useTheme();
 
   const t = (key: string) => {
     return translations[locale][key] || key;
@@ -64,6 +68,11 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   return (
     <I18nContext.Provider value={{ locale, setLocale, t }}>
       <div className="absolute top-4 right-4 z-[100] flex gap-2 bg-background/50 backdrop-blur-md p-1 rounded-lg border border-[var(--glass-border)]">
+         <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="p-1.5 rounded text-[var(--muted-foreground)] hover:text-foreground hover:bg-[var(--glass-border)] transition-colors">
+            <Sun className="w-4 h-4 hidden dark:block" />
+            <Moon className="w-4 h-4 block dark:hidden" />
+         </button>
+         <div className="w-px bg-[var(--glass-border)] mx-1"></div>
          <button onClick={() => setLocale("en")} className={`px-2 py-1 rounded text-xs font-bold ${locale === 'en' ? 'bg-primary text-white' : 'text-gray-400 hover:text-white'}`}>EN</button>
          <button onClick={() => setLocale("es")} className={`px-2 py-1 rounded text-xs font-bold ${locale === 'es' ? 'bg-primary text-white' : 'text-gray-400 hover:text-white'}`}>ES</button>
          <button onClick={() => setLocale("hi")} className={`px-2 py-1 rounded text-xs font-bold ${locale === 'hi' ? 'bg-primary text-white' : 'text-gray-400 hover:text-white'}`}>HI</button>

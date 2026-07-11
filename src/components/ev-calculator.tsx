@@ -232,24 +232,26 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
     }
   };
 
+  const toggleUnit = () => {
+    setRangeUnit(prev => {
+      const isCurrentlyKm = prev === 'km';
+      const factor = isCurrentlyKm ? 0.621371 : 1.60934;
+      const whFactor = isCurrentlyKm ? 1.60934 : 0.621371;
+      setCustomRange(r => Math.round(Number(r) * factor));
+      setIceEfficiency(e => Number(Number(e) * factor).toFixed(1));
+      setWhPerKm(w => Math.round(Number(w) * whFactor));
+      return isCurrentlyKm ? 'miles' : 'km';
+    });
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
-      <h1 className="text-3xl font-bold mb-2 text-center flex items-center justify-center gap-2">
-        <BatteryCharging className="text-primary" /> EV charging Economics & Dashboard
-      </h1>
-      <p className="text-center text-[var(--muted-foreground)] mb-8 max-w-2xl mx-auto">
-        Calculate precise charging times, realistic range gained, and estimate savings against ICE vehicles.
-      </p>
-
       {Number(startSoc) < 20 && (
-        <div className="mb-6 p-4 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-600 dark:text-orange-400 flex gap-3 items-start animate-in slide-in-from-top-4 fade-in">
-          <AlertTriangle className="shrink-0 h-5 w-5 mt-0.5" />
-          <div>
-            <h4 className="font-semibold">Low Battery Warning (Voltage Sag)</h4>
-            <p className="text-sm opacity-90">
-              Your starting SoC is {startSoc}%. Driving below 15-20% causes voltage sag, meaning your actual range will drain faster than estimated.
-            </p>
-          </div>
+        <div className="mb-6 p-3 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-600 dark:text-orange-400 flex gap-2 items-center text-sm animate-in slide-in-from-top-2 fade-in max-w-2xl mx-auto">
+          <AlertTriangle className="shrink-0 h-4 w-4" />
+          <p>
+            <strong>Low Battery (Voltage Sag):</strong> Driving below 20% causes voltage sag, reducing actual range.
+          </p>
         </div>
       )}
 
@@ -323,7 +325,7 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
               <div className="flex justify-end items-center gap-2 mb-2">
                  <span className={`text-sm ${rangeUnit === 'km' ? 'font-bold text-primary' : 'text-muted-foreground'}`}>km</span>
                  <button 
-                    onClick={() => setRangeUnit(prev => prev === 'km' ? 'miles' : 'km')}
+                    onClick={toggleUnit}
                     className="w-12 h-6 bg-[var(--glass-border)] rounded-full relative flex items-center p-1 cursor-pointer transition-colors hover:bg-primary/20"
                  >
                     <div className={`w-4 h-4 bg-primary rounded-full shadow-md transform transition-transform duration-300 ${rangeUnit === 'miles' ? 'translate-x-6' : ''}`}></div>
@@ -436,88 +438,86 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
           
           
           {showAdvanced && (
-            <div className="fixed inset-0 z-[100] flex justify-end bg-black/20 backdrop-blur-sm animate-in fade-in">
-              <div className="w-full max-w-md bg-[var(--background)] h-full shadow-2xl border-l border-[var(--glass-border)] flex flex-col animate-in slide-in-from-right">
-                <div className="p-4 border-b border-[var(--glass-border)] flex justify-between items-center bg-[var(--card-bg)]">
-                  <h3 className="text-lg font-bold">Advanced Settings</h3>
-                  <button onClick={() => setShowAdvanced(false)} className="p-2 hover:bg-[var(--glass-border)] rounded-full transition-colors">
-                    <X className="w-5 h-5 text-[var(--muted-foreground)] hover:text-foreground" />
-                  </button>
-                </div>
-                
-                <div className="p-6 space-y-6 overflow-y-auto flex-grow custom-scrollbar">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Charging Curve / Taper</label>
-                    <div className="flex flex-col gap-2">
-                      <label className="flex items-center gap-2 cursor-pointer text-sm p-2 rounded border border-[var(--glass-border)] hover:bg-[var(--glass-border)] transition-colors">
-                        <input type="radio" checked={curveType === "conservative"} onChange={() => setCurveType("conservative")} className="text-primary" />
-                        <div>
-                          <span className="font-semibold block">Conservative (e.g., Tata EZ Charge)</span>
-                          <span className="text-[var(--muted-foreground)] text-xs">Slows at 80%, drops heavily at 90%</span>
-                        </div>
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer text-sm p-2 rounded border border-[var(--glass-border)] hover:bg-[var(--glass-border)] transition-colors">
-                        <input type="radio" checked={curveType === "aggressive"} onChange={() => setCurveType("aggressive")} className="text-primary" />
-                        <div>
-                          <span className="font-semibold block">Aggressive (e.g., Relux)</span>
-                          <span className="text-[var(--muted-foreground)] text-xs">Full speed until 95%, then slows</span>
-                        </div>
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer text-sm p-2 rounded border border-[var(--glass-border)] hover:bg-[var(--glass-border)] transition-colors">
-                        <input type="radio" checked={curveType === "linear"} onChange={() => setCurveType("linear")} className="text-primary" />
-                        <div>
-                          <span className="font-semibold block">Linear (Home AC)</span>
-                          <span className="text-[var(--muted-foreground)] text-xs">Constant speed, ignores tapering</span>
-                        </div>
-                      </label>
-                    </div>
-                  </div>
-
-                  <div className="pt-4 border-t border-[var(--glass-border)]">
-                     <label className="block text-sm font-medium mb-2">Efficiency (Wh/{rangeUnit})</label>
-                     <div className="flex gap-4 items-center">
-                        <input
-                          type="number"
-                          value={whPerKm}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            setWhPerKm(val);
-                            const numVal = parseFloat(val) || 0;
-                            const numCap = Number(capacity) || 0;
-                            if (numVal > 0 && numCap > 0) setCustomRange(Math.round((numCap * 1000) / numVal));
-                          }}
-                          className="w-1/2 p-2.5 rounded-lg border border-[var(--glass-border)] bg-[var(--background)]/50 focus:ring-2 focus:ring-primary outline-none"
-                        />
-                        <span className="text-xs text-[var(--muted-foreground)] flex-1">Auto-syncs with Max Range.</span>
-                     </div>
-                  </div>
-
-                  <div className="pt-4 border-t border-[var(--glass-border)]">
-                     <label className="block text-sm font-medium mb-2">Charging Efficiency (%)</label>
-                     <div className="flex gap-4 items-center">
-                        <input
-                          type="number" min="10" max="100"
-                          value={efficiency}
-                          onChange={(e) => setEfficiency(e.target.value)}
-                          className="w-1/2 p-2.5 rounded-lg border border-[var(--glass-border)] bg-[var(--background)]/50 focus:ring-2 focus:ring-primary outline-none"
-                        />
-                        <span className="text-xs text-[var(--muted-foreground)] flex-1">Default is 90% (10% lost to heat).</span>
-                     </div>
-                  </div>
-
-                  {result && (
-                    <div className="mt-8 p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 text-sm flex gap-3">
-                      <Info className="shrink-0 text-blue-500 h-5 w-5" />
-                      <div className="text-[var(--muted-foreground)]">
-                        <h4 className="font-semibold text-blue-500 mb-1">Power Loss Physics</h4>
-                        <p>
-                          Total battery energy required is <strong>{(((Number(endSoc) - Number(startSoc)) / 100) * Number(capacity)).toFixed(1)} kWh</strong>. 
-                          Due to {100 - Number(efficiency)}% efficiency loss, you will actually pull <strong>{(((Number(endSoc) - Number(startSoc)) / 100 * Number(capacity)) / (Number(efficiency)/100)).toFixed(1)} kWh</strong> from the grid to complete this charge.
-                        </p>
+            <div className="mt-4 p-5 rounded-xl border border-[var(--glass-border)] bg-[var(--card-bg)] space-y-6 animate-in slide-in-from-top-2 fade-in">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-lg font-bold">Advanced Settings</h3>
+                <button onClick={() => setShowAdvanced(false)} className="p-1 hover:bg-[var(--glass-border)] rounded-full transition-colors text-[var(--muted-foreground)] hover:text-foreground">
+                   <X className="w-4 h-4" />
+                </button>
+              </div>
+              
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Charging Curve / Taper</label>
+                  <div className="flex flex-col gap-2">
+                    <label className="flex items-center gap-2 cursor-pointer text-sm p-2 rounded border border-[var(--glass-border)] hover:bg-[var(--glass-border)] transition-colors">
+                      <input type="radio" checked={curveType === "conservative"} onChange={() => setCurveType("conservative")} className="text-primary" />
+                      <div>
+                        <span className="font-semibold block">Conservative (e.g., Tata EZ Charge)</span>
+                        <span className="text-[var(--muted-foreground)] text-xs">Slows at 80%, drops heavily at 90%</span>
                       </div>
-                    </div>
-                  )}
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer text-sm p-2 rounded border border-[var(--glass-border)] hover:bg-[var(--glass-border)] transition-colors">
+                      <input type="radio" checked={curveType === "aggressive"} onChange={() => setCurveType("aggressive")} className="text-primary" />
+                      <div>
+                        <span className="font-semibold block">Aggressive (e.g., Relux)</span>
+                        <span className="text-[var(--muted-foreground)] text-xs">Full speed until 95%, then slows</span>
+                      </div>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer text-sm p-2 rounded border border-[var(--glass-border)] hover:bg-[var(--glass-border)] transition-colors">
+                      <input type="radio" checked={curveType === "linear"} onChange={() => setCurveType("linear")} className="text-primary" />
+                      <div>
+                        <span className="font-semibold block">Linear (Home AC)</span>
+                        <span className="text-[var(--muted-foreground)] text-xs">Constant speed, ignores tapering</span>
+                      </div>
+                    </label>
+                  </div>
                 </div>
+
+                <div className="pt-4 border-t border-[var(--glass-border)]">
+                   <label className="block text-sm font-medium mb-2">Efficiency (Wh/{rangeUnit})</label>
+                   <div className="flex gap-4 items-center">
+                      <input
+                        type="number"
+                        value={whPerKm}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setWhPerKm(val);
+                          const numVal = parseFloat(val) || 0;
+                          const numCap = Number(capacity) || 0;
+                          if (numVal > 0 && numCap > 0) setCustomRange(Math.round((numCap * 1000) / numVal));
+                        }}
+                        className="w-1/2 p-2.5 rounded-lg border border-[var(--glass-border)] bg-[var(--background)]/50 focus:ring-2 focus:ring-primary outline-none"
+                      />
+                      <span className="text-xs text-[var(--muted-foreground)] flex-1">Auto-syncs with Max Range.</span>
+                   </div>
+                </div>
+
+                <div className="pt-4 border-t border-[var(--glass-border)]">
+                   <label className="block text-sm font-medium mb-2">Charging Efficiency (%)</label>
+                   <div className="flex gap-4 items-center">
+                      <input
+                        type="number" min="10" max="100"
+                        value={efficiency}
+                        onChange={(e) => setEfficiency(e.target.value)}
+                        className="w-1/2 p-2.5 rounded-lg border border-[var(--glass-border)] bg-[var(--background)]/50 focus:ring-2 focus:ring-primary outline-none"
+                      />
+                      <span className="text-xs text-[var(--muted-foreground)] flex-1">Default is 90% (10% lost to heat).</span>
+                   </div>
+                </div>
+
+                {result && (
+                  <div className="mt-8 p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 text-sm flex gap-3">
+                    <Info className="shrink-0 text-blue-500 h-5 w-5" />
+                    <div className="text-[var(--muted-foreground)]">
+                      <h4 className="font-semibold text-blue-500 mb-1">Power Loss Physics</h4>
+                      <p>
+                        Total battery energy required is <strong>{(((Number(endSoc) - Number(startSoc)) / 100) * Number(capacity)).toFixed(1)} kWh</strong>. 
+                        Due to {100 - Number(efficiency)}% efficiency loss, you will actually pull <strong>{(((Number(endSoc) - Number(startSoc)) / 100 * Number(capacity)) / (Number(efficiency)/100)).toFixed(1)} kWh</strong> from the grid to complete this charge.
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
