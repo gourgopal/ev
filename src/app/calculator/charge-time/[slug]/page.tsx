@@ -112,7 +112,7 @@ export default async function CarCalculatorPage(props: Props) {
                <Link href={`/calculator/charge-time/${similar.slug}`} key={similar.slug} className="glass-panel p-5 hover:border-primary transition-colors group">
                   <h3 className="font-bold text-lg group-hover:text-primary transition-colors">{similar.brand} {similar.model}</h3>
                   <p className="text-sm text-[var(--muted-foreground)] mt-2">
-                    {similar.capacity} kWh Battery &bull; {similar.range} km Range
+                    {similar.capacity} kWh Battery &bull; {similar.range} {similar.rangeUnit} Range
                   </p>
                </Link>
              ))}

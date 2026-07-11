@@ -39,6 +39,7 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
   const [chargerKw, setChargerKw] = useState<number | string>(7.2);
   const [efficiency, setEfficiency] = useState<number | string>(90);
   const [curveType, setCurveType] = useState<"conservative" | "aggressive" | "linear">("conservative");
+  const [rangeUnit, setRangeUnit] = useState<"km" | "miles">(initialCar?.rangeUnit || "km");
 
   // Advanced State
   const [whPerKm, setWhPerKm] = useState<number | string>(
@@ -107,6 +108,7 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
     if (car) {
       setCapacity(car.capacity);
       setCustomRange(car.range);
+      setRangeUnit(car.rangeUnit);
       setWhPerKm(Math.round((car.capacity * 1000) / car.range));
     }
     setIsDropdownOpen(false);
@@ -304,7 +306,7 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
                             >
                               <div className="flex flex-col">
                                 <span className="font-semibold text-sm group-hover:text-primary transition-colors">{car.brand} {car.model}</span>
-                                <span className="text-xs text-muted-foreground">{car.country} • Est. Range: {car.range}km</span>
+                                <span className="text-xs text-muted-foreground">{car.country} • Est. Range: {car.range} {car.rangeUnit}</span>
                               </div>
                               <span className="text-sm font-mono bg-background px-2 py-1 rounded border border-border">{car.capacity} kWh</span>
                             </button>
@@ -327,7 +329,7 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
                   />
                 </div>
                 <div>
-                   <label className="block text-sm font-medium mb-1">Max Range (km)</label>
+                   <label className="block text-sm font-medium mb-1">Max Range ({rangeUnit})</label>
                     <input
                       type="number"
                       value={customRange}
@@ -400,7 +402,7 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">ICE Efficiency (km/L)</label>
+                  <label className="block text-sm font-medium mb-1">ICE Efficiency ({rangeUnit}/L)</label>
                   <input
                     type="number" step="1"
                     value={iceEfficiency}
@@ -449,7 +451,7 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
               </div>
 
               <div className="pt-4 border-t border-[var(--glass-border)]">
-                 <label className="block text-sm font-medium mb-2">Efficiency (Wh/km)</label>
+                 <label className="block text-sm font-medium mb-2">Efficiency (Wh/{rangeUnit})</label>
                  <div className="flex gap-4 items-center">
                     <input
                       type="number"
@@ -514,7 +516,7 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
                   <div className="grid grid-cols-2 gap-6 w-full mt-8">
                      <div className="bg-white/10 p-4 rounded-2xl backdrop-blur-md text-center border border-white/10">
                         <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">Range Gained</p>
-                        <p className="text-2xl font-bold font-mono">+{Math.round(((simSoc - Number(startSoc)) / 100) * Number(customRange))} km</p>
+                        <p className="text-2xl font-bold font-mono">+{Math.round(((simSoc - Number(startSoc)) / 100) * Number(customRange))} {rangeUnit}</p>
                      </div>
                      <div className="bg-white/10 p-4 rounded-2xl backdrop-blur-md text-center border border-white/10">
                         <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">Current Speed</p>
@@ -579,7 +581,7 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
               <div className="grid grid-cols-2 gap-4">
                  <div className="bg-[var(--card-bg)] border border-[var(--glass-border)] p-4 rounded-xl">
                     <p className="text-sm text-[var(--muted-foreground)] mb-1 uppercase tracking-wider">Range Gained</p>
-                    <p className="text-2xl font-bold text-green-500 font-mono">+{Math.round(result.rangeGained)} km</p>
+                    <p className="text-2xl font-bold text-green-500 font-mono">+{Math.round(result.rangeGained)} {rangeUnit}</p>
                  </div>
                  <div className="bg-[var(--card-bg)] border border-[var(--glass-border)] p-4 rounded-xl">
                     <p className="text-sm text-[var(--muted-foreground)] mb-1 uppercase tracking-wider">Total Cost</p>
@@ -598,7 +600,7 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
                 {result.savings > 0 ? (
                   <>
                     <p className="text-4xl font-bold text-green-500 font-mono mb-2">+{currency}{Math.round(result.savings)}</p>
-                    <p className="text-sm text-[var(--muted-foreground)]">Saved compared to driving the same {Math.round(result.rangeGained)}km in an ICE vehicle (which would cost {currency}{Math.round(result.iceCost)}).</p>
+                    <p className="text-sm text-[var(--muted-foreground)]">Saved compared to driving the same {Math.round(result.rangeGained)} {rangeUnit} in an ICE vehicle (which would cost {currency}{Math.round(result.iceCost)}).</p>
                   </>
                 ) : (
                   <>
@@ -619,9 +621,9 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
                   <div className="p-4 space-y-4 text-sm text-[var(--muted-foreground)]">
                      
                       <div className="space-y-2">
-                        <p className="font-semibold text-foreground border-b border-[var(--glass-border)] pb-1">Efficiency Impact (Wh/km)</p>
-                        <p>Your vehicle consumes {whPerKm} Wh/km. At this rate, gaining 100km of range requires {(Number(whPerKm) * 100 / 1000).toFixed(1)} kWh of battery energy.</p>
-                        <p className="text-xs">Aggressive driving or AC use can push this to {Math.round(Number(whPerKm) * 1.3)} Wh/km, reducing your max range to {Math.round((Number(capacity) * 1000) / (Number(whPerKm) * 1.3))} km.</p>
+                        <p className="font-semibold text-foreground border-b border-[var(--glass-border)] pb-1">Efficiency Impact (Wh/{rangeUnit})</p>
+                        <p>Your vehicle consumes {whPerKm} Wh/{rangeUnit}. At this rate, gaining 100 {rangeUnit} of range requires {(Number(whPerKm) * 100 / 1000).toFixed(1)} kWh of battery energy.</p>
+                        <p className="text-xs">Aggressive driving or AC use can push this to {Math.round(Number(whPerKm) * 1.3)} Wh/{rangeUnit}, reducing your max range to {Math.round((Number(capacity) * 1000) / (Number(whPerKm) * 1.3))} {rangeUnit}.</p>
                       </div>
 
                       <div className="space-y-2 pt-2">
@@ -638,7 +640,7 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
                         <p className="text-xs mb-1">Most modern EVs use <strong>LFP (Lithium Iron Phosphate)</strong> (e.g., BYD Blade, Tata Nexon). LFP is safer and can be charged to 100% regularly without significant degradation. <strong>NMC/NCA</strong> batteries (used in premium/long-range EVs) charge faster but should ideally be kept between 20-80% for daily use.</p>
                         <p className="text-xs font-mono bg-[var(--background)] p-2 rounded">
                           LFP Lifespan: ~3000 cycles to 80% capacity<br/>
-                          Estimated: <strong>{Math.round(3000 * Number(customRange)).toLocaleString()} km</strong> before dropping to {Math.round(Number(capacity) * 0.8)} kWh capacity.
+                          Estimated: <strong>{Math.round(3000 * Number(customRange)).toLocaleString()} {rangeUnit}</strong> before dropping to {Math.round(Number(capacity) * 0.8)} kWh capacity.
                         </p>
                       </div>
 
@@ -732,7 +734,7 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
                <div className="bg-[var(--card-bg)] p-4 rounded-xl border border-[var(--glass-border)] space-y-3">
                   <div className="flex justify-between items-center border-b border-[var(--glass-border)] pb-2">
                     <span className="text-sm text-[var(--muted-foreground)]">Range Added</span>
-                    <span className="font-mono font-bold text-green-500">+{completedSummary.rangeGained} km</span>
+                    <span className="font-mono font-bold text-green-500">+{completedSummary.rangeGained} {rangeUnit}</span>
                   </div>
                   <div className="flex justify-between items-center border-b border-[var(--glass-border)] pb-2">
                     <span className="text-sm text-[var(--muted-foreground)]">Energy Delivered</span>
@@ -780,7 +782,7 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
                         <span className="text-[var(--muted-foreground)] text-xs">{session.date.toLocaleDateString()} {session.date.toLocaleTimeString()} • {session.timeMins} mins</span>
                      </div>
                      <div className="flex flex-col items-end text-right gap-1">
-                        <span className="font-mono text-green-500 font-bold text-base">+{session.rangeGained} km</span>
+                        <span className="font-mono text-green-500 font-bold text-base">+{session.rangeGained} {rangeUnit}</span>
                         <span className="text-[var(--muted-foreground)] text-xs font-mono">{currency}{session.cost} • {session.energy} kWh</span>
                      </div>
                   </div>

@@ -44,6 +44,7 @@ for (let i = 1; i < lines.length; i++) {
 
     const capacity = parseFloat(capacityStr.replace(/[^0-9.]/g, '')) || 0;
     const range = parseInt(rangeStr.replace(/[^0-9]/g, ''), 10) || 0;
+    const rangeUnit = rangeStr.toLowerCase().includes('mile') ? 'miles' : 'km';
 
     if (brand && model && capacity) {
         const slug = generateSlug(brand, model, capacity);
@@ -52,6 +53,7 @@ for (let i = 1; i < lines.length; i++) {
             model,
             capacity,
             range,
+            rangeUnit,
             year,
             country,
             slug
@@ -65,7 +67,8 @@ export type EVCar = {
   brand: string;
   model: string;
   capacity: number; // kWh
-  range: number; // km
+  range: number;
+  rangeUnit: 'km' | 'miles';
   year: string;
   country: string;
   slug: string;
