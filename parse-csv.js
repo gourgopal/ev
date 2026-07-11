@@ -39,6 +39,7 @@ for (let i = 1; i < lines.length; i++) {
     const brand = cols[1] || '';
     const model = cols[2] || '';
     const year = cols[3] || '';
+    const batteryType = cols[4] || '';
     const capacityStr = cols[5] || '0';
     const rangeStr = cols[9] || '0';
 
@@ -52,6 +53,7 @@ for (let i = 1; i < lines.length; i++) {
             brand,
             model,
             capacity,
+            batteryType,
             range,
             rangeUnit,
             year,
@@ -67,6 +69,7 @@ export type EVCar = {
   brand: string;
   model: string;
   capacity: number; // kWh
+  batteryType: string;
   range: number;
   rangeUnit: 'km' | 'miles';
   year: string;

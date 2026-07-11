@@ -11,6 +11,8 @@ export type ChargeHistoryItem = {
   energy: string;
   timeMins: number;
   rangeGained: number;
+  carModel?: string;
+  chargerType?: string;
 };
 
 export type CompletedSummary = ChargeHistoryItem | null;
@@ -167,13 +169,14 @@ export function EVProvider({ children }: { children: React.ReactNode }) {
          cost: math.currentCost,
          energy: math.energyUsedSoFar.toFixed(1),
          timeMins: math.mins,
-         rangeGained: math.rangeGained
+         rangeGained: math.rangeGained,
+         carModel: session.carModel,
+         chargerType: session.chargerKw + " kW"
       };
       setChargeHistory(prev => [historyItem, ...prev]);
       
-      if (reason === "COMPLETED") {
-        setCompletedSummary(historyItem);
-      }
+      // Always show summary when stopping (either completed or manually stopped)
+      setCompletedSummary(historyItem);
     }
     
     setActiveSession(null);
