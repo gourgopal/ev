@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { EV_CARS, EVCar } from "@/lib/ev-cars";
-import { ChevronDown, Search, Thermometer, Wind, Zap, Navigation, Users } from "lucide-react";
+import { ChevronDown, Search, Thermometer, Wind, Zap, Navigation, Users, Lightbulb, Music } from "lucide-react";
 import { I18nProvider, useI18n } from "@/components/i18n-provider";
 
 function RangeCalculatorContent() {
@@ -17,12 +17,15 @@ function RangeCalculatorContent() {
   // Base values
   const [baseRange, setBaseRange] = useState<number>(defaultCar?.range || 400);
   const [rangeUnit, setRangeUnit] = useState<"km" | "miles">(defaultCar?.rangeUnit || "km");
+  const [efficiency, setEfficiency] = useState<number>(rangeUnit === "km" ? 150 : 240);
   
   // Conditions
   const [temperature, setTemperature] = useState<number>(20); // Celsius
   const [speed, setSpeed] = useState<"city" | "mixed" | "highway">("mixed");
   const [climateControl, setClimateControl] = useState<"off" | "eco" | "max">("eco");
   const [payload, setPayload] = useState<number>(1); // Number of passengers
+  const [headlights, setHeadlights] = useState<boolean>(false);
+  const [music, setMusic] = useState<boolean>(true);
 
   const filteredCars = EV_CARS.filter(car => 
     `${car.brand} ${car.model}`.toLowerCase().includes(searchQuery.toLowerCase())
@@ -32,6 +35,7 @@ function RangeCalculatorContent() {
     setSelectedCar(car);
     setBaseRange(car.range);
     setRangeUnit(car.rangeUnit);
+    setEfficiency(car.rangeUnit === "km" ? 150 : 240);
     setIsDropdownOpen(false);
     setSearchQuery("");
   };
@@ -39,6 +43,12 @@ function RangeCalculatorContent() {
   // Calculate realistic range based on factors
   const calculateRange = () => {
     let multiplier = 1.0;
+
+    // 0. Base Efficiency Adjustment
+    const baseEfficiency = rangeUnit === "km" ? 150 : 240;
+    if (efficiency > 0) {
+      multiplier *= (baseEfficiency / efficiency);
+    }
 
     // 1. Temperature Impact (EVs love 20-25C)
     if (temperature < 0) {
@@ -67,6 +77,14 @@ function RangeCalculatorContent() {
     // 4. Payload/Weight
     if (payload > 1) {
       multiplier -= (payload - 1) * 0.02; // Roughly 2% drop per extra passenger
+    }
+
+    // 5. Auxiliaries
+    if (headlights) {
+      multiplier *= 0.98; // ~2% loss
+    }
+    if (music) {
+      multiplier *= 0.99; // ~1% loss
     }
 
     return Math.max(0, Math.round(baseRange * multiplier));
@@ -134,14 +152,25 @@ function RangeCalculatorContent() {
                     )}
                   </div>
                   
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Claimed WLTP/EPA Range ({rangeUnit})</label>
-                    <input
-                      type="number"
-                      value={baseRange}
-                      onChange={(e) => setBaseRange(Number(e.target.value))}
-                      className="w-full p-3 rounded-lg border border-[var(--glass-border)] bg-[var(--background)]/50 focus:ring-2 focus:ring-primary outline-none"
-                    />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Claimed Range ({rangeUnit})</label>
+                      <input
+                        type="number"
+                        value={baseRange}
+                        onChange={(e) => setBaseRange(Number(e.target.value))}
+                        className="w-full p-3 rounded-lg border border-[var(--glass-border)] bg-[var(--background)]/50 focus:ring-2 focus:ring-primary outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Efficiency (Wh/{rangeUnit})</label>
+                      <input
+                        type="number"
+                        value={efficiency}
+                        onChange={(e) => setEfficiency(Number(e.target.value))}
+                        className="w-full p-3 rounded-lg border border-[var(--glass-border)] bg-[var(--background)]/50 focus:ring-2 focus:ring-primary outline-none"
+                      />
+                    </div>
                   </div>
                </div>
             </div>
@@ -208,6 +237,24 @@ function RangeCalculatorContent() {
                     onChange={(e) => setPayload(Number(e.target.value))}
                     className="w-full accent-primary"
                   />
+               </div>
+
+               <div className="pt-4 border-t border-[var(--glass-border)]">
+                 <label className="block text-sm font-medium mb-3">Auxiliaries</label>
+                 <div className="grid grid-cols-2 gap-4">
+                    <button 
+                       onClick={() => setHeadlights(!headlights)}
+                       className={`py-3 rounded-lg text-sm font-semibold border transition-all flex items-center justify-center gap-2 ${headlights ? 'bg-primary text-white border-primary shadow-lg shadow-primary/30' : 'bg-[var(--background)]/50 border-[var(--glass-border)] text-[var(--muted-foreground)] hover:border-primary/50'}`}
+                     >
+                       <Lightbulb className="w-4 h-4" /> Headlights
+                     </button>
+                     <button 
+                       onClick={() => setMusic(!music)}
+                       className={`py-3 rounded-lg text-sm font-semibold border transition-all flex items-center justify-center gap-2 ${music ? 'bg-primary text-white border-primary shadow-lg shadow-primary/30' : 'bg-[var(--background)]/50 border-[var(--glass-border)] text-[var(--muted-foreground)] hover:border-primary/50'}`}
+                     >
+                       <Music className="w-4 h-4" /> Music System
+                     </button>
+                 </div>
                </div>
 
             </div>
