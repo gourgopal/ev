@@ -85,10 +85,18 @@ export default function RootLayout({
           </div>
           
           {/* Floating Navigation */}
-          <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[var(--card-bg)]/90 backdrop-blur-xl border border-[var(--glass-border)] rounded-full px-6 py-3 shadow-2xl flex items-center gap-8 z-50">
+          <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[var(--card-bg)]/90 backdrop-blur-xl border border-[var(--glass-border)] rounded-full px-6 py-3 shadow-2xl flex items-center gap-6 md:gap-8 z-50">
              <a href="/" className="text-[var(--muted-foreground)] hover:text-primary transition-colors flex flex-col items-center gap-1">
                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                <span className="text-[10px] font-semibold">Calc</span>
+             </a>
+             <a href="/range" className="text-[var(--muted-foreground)] hover:text-primary transition-colors flex flex-col items-center gap-1">
+               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+               <span className="text-[10px] font-semibold">Range</span>
+             </a>
+             <a href="/tco" className="text-[var(--muted-foreground)] hover:text-primary transition-colors flex flex-col items-center gap-1">
+               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+               <span className="text-[10px] font-semibold">TCO</span>
              </a>
              <a href="/map" className="text-[var(--muted-foreground)] hover:text-primary transition-colors flex flex-col items-center gap-1">
                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" x2="9" y1="3" y2="18"/><line x1="15" x2="15" y1="6" y2="21"/></svg>

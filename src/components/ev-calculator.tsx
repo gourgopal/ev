@@ -313,16 +313,33 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
                 </div>
               </div>
 
-              {/* Unit Toggle */}
-              <div className="flex justify-end items-center gap-2 mb-2">
-                 <span className={`text-sm ${rangeUnit === 'km' ? 'font-bold text-primary' : 'text-muted-foreground'}`}>km</span>
-                 <button 
-                    onClick={toggleUnit}
-                    className="w-12 h-6 bg-[var(--glass-border)] rounded-full relative flex items-center p-1 cursor-pointer transition-colors hover:bg-primary/20"
-                 >
-                    <div className={`w-4 h-4 bg-primary rounded-full shadow-md transform transition-transform duration-300 ${rangeUnit === 'miles' ? 'translate-x-6' : ''}`}></div>
-                 </button>
-                 <span className={`text-sm ${rangeUnit === 'miles' ? 'font-bold text-primary' : 'text-muted-foreground'}`}>miles</span>
+              {/* Unit & Currency Toggles */}
+              <div className="flex justify-between items-center mb-2">
+                 <div className="flex items-center gap-2">
+                    <span className="text-sm text-[var(--muted-foreground)]">Currency:</span>
+                    <select 
+                      value={currency} 
+                      onChange={(e) => setCurrency(e.target.value)}
+                      className="bg-background border border-[var(--glass-border)] rounded px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-primary cursor-pointer"
+                    >
+                      <option value="₹">INR (₹)</option>
+                      <option value="$">USD ($)</option>
+                      <option value="€">EUR (€)</option>
+                      <option value="£">GBP (£)</option>
+                      <option value="¥">JPY (¥)</option>
+                    </select>
+                 </div>
+                 
+                 <div className="flex items-center gap-2">
+                   <span className={`text-sm ${rangeUnit === 'km' ? 'font-bold text-primary' : 'text-muted-foreground'}`}>km</span>
+                   <button 
+                      onClick={toggleUnit}
+                      className="w-12 h-6 bg-[var(--glass-border)] rounded-full relative flex items-center p-1 cursor-pointer transition-colors hover:bg-primary/20"
+                   >
+                      <div className={`w-4 h-4 bg-primary rounded-full shadow-md transform transition-transform duration-300 ${rangeUnit === 'miles' ? 'translate-x-6' : ''}`}></div>
+                   </button>
+                   <span className={`text-sm ${rangeUnit === 'miles' ? 'font-bold text-primary' : 'text-muted-foreground'}`}>miles</span>
+                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -692,9 +709,7 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
                )}
 
 
-              <div className="flex-grow" />
-
-              <div className="fixed md:static bottom-0 left-0 right-0 z-50 md:z-auto bg-background/95 md:bg-transparent backdrop-blur-xl md:backdrop-blur-none border-t border-[var(--glass-border)] md:border-t p-4 md:p-0 mt-4 md:pt-4 flex flex-col gap-3 shadow-[0_-10px_30px_rgba(0,0,0,0.3)] md:shadow-none">
+              {/* Simulation Block */}              <div className="fixed md:static bottom-0 left-0 right-0 z-50 md:z-auto bg-background/95 md:bg-transparent backdrop-blur-xl md:backdrop-blur-none border-t border-[var(--glass-border)] md:border-t p-4 md:p-0 mt-4 md:pt-4 flex flex-col gap-3 shadow-[0_-10px_30px_rgba(0,0,0,0.3)] md:shadow-none">
                 {Number(startSoc) < 20 && (
                   <div className="mb-2 p-2 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-600 dark:text-orange-400 flex gap-2 items-center text-xs animate-in slide-in-from-bottom-2 fade-in">
                     <AlertTriangle className="shrink-0 h-4 w-4" />
