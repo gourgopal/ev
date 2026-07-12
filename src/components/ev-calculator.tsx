@@ -796,7 +796,7 @@ export default function EVChargingCalculator({
               </div>
 
               {/* Main LCD Display & Unified Results (Sliding Carousel) */}
-              <div className="flex-grow flex flex-col items-center justify-center py-6 relative overflow-hidden group w-full">
+              <div className="flex-grow flex flex-col items-start justify-center py-6 relative overflow-hidden group w-full">
                  
                  {/* Navigation Chevrons */}
                  <button 

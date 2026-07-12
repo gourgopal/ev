@@ -58,11 +58,12 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
           
           {children}
           
-          {/* Bottom Ad Space Placeholder */}
+          {/* Bottom Ad Space */}
           {FEATURE_FLAGS.ENABLE_ADS && !isPremium && (
-            <div className="w-full max-w-4xl mx-auto h-20 bg-[var(--card-bg)] border border-[var(--glass-border)] rounded-xl my-4 mt-12 flex items-center justify-center text-[var(--muted-foreground)] text-sm shadow-sm relative group">
-               <span>Ad Space Placeholder (Responsive)</span>
-               <button onClick={() => setShowPremiumDialog(true)} className="absolute right-4 text-[10px] text-cyan-500 hover:underline opacity-0 group-hover:opacity-100 transition-opacity">Remove Ads</button>
+            <div className="w-full max-w-4xl mx-auto bg-[#0a0a0a] border border-green-500/30 rounded-2xl shadow-[var(--neon-glow)] overflow-hidden relative group my-4 mt-12">
+               <div className="absolute top-2 left-2 z-10 bg-black/60 px-2 py-1 rounded text-[8px] text-green-500/50 uppercase tracking-widest font-mono border border-green-500/20">Sponsored</div>
+               <AffiliateCarousel selectedCar={null} />
+               <button onClick={() => setShowPremiumDialog(true)} className="absolute bottom-2 right-2 text-[10px] text-cyan-500 hover:underline opacity-0 group-hover:opacity-100 transition-opacity z-20 bg-background/80 px-2 rounded">Remove Ads</button>
             </div>
           )}
         </div>
