@@ -741,7 +741,7 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
 
 
               {/* Simulation Block */}              
-              <div className="fixed md:static bottom-0 left-0 right-0 z-50 md:z-auto bg-[var(--background)]/95 md:bg-transparent backdrop-blur-xl md:backdrop-blur-none border-t border-[var(--glass-border)] md:border-transparent p-4 md:p-0 mt-2 md:mt-2 flex flex-col gap-2 shadow-[0_-10px_30px_rgba(0,0,0,0.3)] md:shadow-none">
+              <div className="fixed md:static bottom-24 left-0 right-0 z-50 md:z-auto bg-[var(--background)]/95 md:bg-transparent backdrop-blur-xl md:backdrop-blur-none border-t border-[var(--glass-border)] md:border-transparent p-4 md:p-0 mt-2 md:mt-2 flex flex-col gap-2 shadow-[0_-10px_30px_rgba(0,0,0,0.3)] md:shadow-none">
                 {Number(startSoc) < 20 && (
                   <div className="mb-1 p-2 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-600 dark:text-orange-400 flex gap-2 items-center text-xs animate-in slide-in-from-bottom-2 fade-in">
                     <AlertTriangle className="shrink-0 h-4 w-4" />

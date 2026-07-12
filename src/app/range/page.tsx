@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { EV_CARS, EVCar } from "@/lib/ev-cars";
-import { ChevronDown, Search, Thermometer, Wind, Zap, Navigation, Users, Lightbulb, Music } from "lucide-react";
+import { ChevronDown, Search, Thermometer, Wind, Zap, Navigation, Users, Lightbulb, Music, Battery, Map, Settings2 } from "lucide-react";
 import { I18nProvider, useI18n } from "@/components/i18n-provider";
 
 function RangeCalculatorContent() {
@@ -26,6 +26,9 @@ function RangeCalculatorContent() {
   const [payload, setPayload] = useState<number>(1); // Number of passengers
   const [headlights, setHeadlights] = useState<boolean>(false);
   const [music, setMusic] = useState<boolean>(true);
+  const [batteryAge, setBatteryAge] = useState<number>(0);
+  const [roadCondition, setRoadCondition] = useState<"flat" | "uphill" | "bad_road" | "rain_snow">("flat");
+  const [cruiseControl, setCruiseControl] = useState<boolean>(false);
 
   const filteredCars = EV_CARS.filter(car => 
     `${car.brand} ${car.model}`.toLowerCase().includes(searchQuery.toLowerCase())
@@ -59,19 +62,24 @@ function RangeCalculatorContent() {
       multiplier *= 0.90; // Severe heat requires AC for battery cooling
     }
 
-    // 2. Speed Impact (Aerodynamic Drag Physics)
-    // Drag increases with the square of velocity.
-    // EVs are most efficient around 40-50 km/h.
-    // Let's use a parabolic efficiency curve centered around 45 km/h.
-    const speedVal = rangeUnit === 'miles' ? constantSpeed * 1.609 : constantSpeed; // normalize to km/h for math
-    // 1.25 max multiplier at 45km/h. Drops off exponentially at higher speeds.
-    const dragLoss = Math.pow(Math.max(0, speedVal - 45), 2) / 9000;
-    const speedMultiplier = 1.25 - dragLoss;
-    multiplier *= Math.max(0.4, speedMultiplier); // Cap max loss at 60%
+    // 2. Speed & Cruise Impact (Aerodynamic Drag Physics)
+    const speedVal = rangeUnit === 'miles' ? constantSpeed * 1.609 : constantSpeed; 
+    
+    // Anchor at 45 km/h for 1.0 multiplier
+    let speedMultiplier = 1.0;
+    if (speedVal > 45) {
+       speedMultiplier -= Math.pow(speedVal - 45, 2) / 8000;
+    } else {
+       speedMultiplier += (45 - Math.max(30, speedVal)) * 0.005; 
+    }
+    multiplier *= Math.max(0.4, speedMultiplier);
+
+    if (cruiseControl && speedVal >= 40) {
+      multiplier *= 1.05; // 5% gain for smooth driving
+    }
 
     // 3. Climate Control
     if (climateControl === "max") {
-      // Heating in cold is worse than AC in hot
       multiplier *= (temperature < 10) ? 0.80 : 0.90;
     } else if (climateControl === "eco") {
       multiplier *= 0.95;
@@ -79,10 +87,20 @@ function RangeCalculatorContent() {
 
     // 4. Payload/Weight
     if (payload > 1) {
-      multiplier -= (payload - 1) * 0.02; // Roughly 2% drop per extra passenger
+      multiplier *= (1 - (payload - 1) * 0.02); // 2% drop per extra passenger
     }
 
-    // 5. Auxiliaries
+    // 5. Road Conditions
+    if (roadCondition === "uphill") multiplier *= 0.80; // 20% loss
+    if (roadCondition === "bad_road") multiplier *= 0.90; // 10% loss
+    if (roadCondition === "rain_snow") multiplier *= 0.85; // 15% loss
+
+    // 6. Battery Degradation
+    if (batteryAge > 0) {
+      multiplier *= Math.pow(0.985, batteryAge); // 1.5% loss per year compounding
+    }
+
+    // 7. Auxiliaries
     if (headlights) {
       multiplier *= 0.98; // ~2% loss
     }
@@ -110,7 +128,7 @@ function RangeCalculatorContent() {
           <p className="text-[var(--muted-foreground)]">See how weather, speed, and passengers affect your EV's true range.</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="flex flex-col-reverse lg:grid lg:grid-cols-12 gap-8">
           
           {/* Left Column: Inputs */}
           <div className="lg:col-span-7 space-y-6">
@@ -249,9 +267,37 @@ function RangeCalculatorContent() {
                   />
                </div>
 
+               <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="text-sm font-medium flex items-center gap-2"><Battery className="w-4 h-4 text-green-500" /> Battery Age</label>
+                    <span className="font-mono bg-[var(--background)] px-2 py-1 rounded text-sm">{batteryAge} Years</span>
+                  </div>
+                  <input 
+                    type="range" min="0" max="15" step="1"
+                    value={batteryAge}
+                    onChange={(e) => setBatteryAge(Number(e.target.value))}
+                    className="w-full accent-primary"
+                  />
+               </div>
+
+               <div>
+                 <label className="block text-sm font-medium mb-3 flex items-center gap-2"><Map className="w-4 h-4 text-emerald-500" /> Road Conditions</label>
+                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                   {['flat', 'uphill', 'bad_road', 'rain_snow'].map((c) => (
+                     <button 
+                       key={c}
+                       onClick={() => setRoadCondition(c as any)}
+                       className={`py-2 rounded-lg text-xs font-semibold capitalize border transition-all ${roadCondition === c ? 'bg-primary text-white border-primary shadow-lg shadow-primary/30' : 'bg-[var(--background)]/50 border-[var(--glass-border)] text-[var(--muted-foreground)] hover:border-primary/50'}`}
+                     >
+                       {c.replace('_', ' ')}
+                     </button>
+                   ))}
+                 </div>
+               </div>
+
                <div className="pt-4 border-t border-[var(--glass-border)]">
-                 <label className="block text-sm font-medium mb-3">Auxiliaries</label>
-                 <div className="grid grid-cols-2 gap-4">
+                 <label className="block text-sm font-medium mb-3">Auxiliaries & Features</label>
+                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                     <button 
                        onClick={() => setHeadlights(!headlights)}
                        className={`py-3 rounded-lg text-sm font-semibold border transition-all flex items-center justify-center gap-2 ${headlights ? 'bg-primary text-white border-primary shadow-lg shadow-primary/30' : 'bg-[var(--background)]/50 border-[var(--glass-border)] text-[var(--muted-foreground)] hover:border-primary/50'}`}
@@ -263,6 +309,12 @@ function RangeCalculatorContent() {
                        className={`py-3 rounded-lg text-sm font-semibold border transition-all flex items-center justify-center gap-2 ${music ? 'bg-primary text-white border-primary shadow-lg shadow-primary/30' : 'bg-[var(--background)]/50 border-[var(--glass-border)] text-[var(--muted-foreground)] hover:border-primary/50'}`}
                      >
                        <Music className="w-4 h-4" /> Music System
+                     </button>
+                     <button 
+                       onClick={() => setCruiseControl(!cruiseControl)}
+                       className={`py-3 rounded-lg text-sm font-semibold border transition-all flex items-center justify-center gap-2 ${cruiseControl ? 'bg-primary text-white border-primary shadow-lg shadow-primary/30' : 'bg-[var(--background)]/50 border-[var(--glass-border)] text-[var(--muted-foreground)] hover:border-primary/50'}`}
+                     >
+                       <Settings2 className="w-4 h-4" /> Cruise (Eco)
                      </button>
                  </div>
                </div>
