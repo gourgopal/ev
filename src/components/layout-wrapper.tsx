@@ -5,6 +5,7 @@ import { PremiumDialog } from "./premium-dialog";
 import { useState } from "react";
 import { User, Zap, BatteryCharging } from "lucide-react";
 import Link from "next/link";
+import { AffiliateCarousel } from "@/components/affiliate-carousel";
 import { usePathname } from "next/navigation";
 import { FEATURE_FLAGS } from "@/lib/config";
 

@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "EV-Time | Premium EV Charging Economics & Map Explorer",
-  description: "Calculate EV charging times, find live charging stations globally, compare ICE vs EV savings, and cure range anxiety with our advanced simulator.",
+  description: "Calculate EV charging times, find live charging stations globally, compare ICE vs EV savings, calculate your true cost per km, and cure range anxiety with our advanced simulator.",
   keywords: ["EV", "electric vehicle", "charging calculator", "EV map", "ICE vs EV", "EV ownership", "charging stations"],
   openGraph: {
     title: "EV-Time Explorer",

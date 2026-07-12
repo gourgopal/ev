@@ -1,6 +1,7 @@
 "use client";
 
-import { Info, Zap, Battery, Fuel, Calculator } from "lucide-react";
+import { Info, Zap, Battery, Fuel, Calculator, ShieldAlert } from "lucide-react";
+import EVTips from "@/components/ev-tips";
 import { I18nProvider, useI18n } from "@/components/i18n-provider";
 import Link from "next/link";
 
@@ -81,6 +82,18 @@ function InfoContent() {
               </div>
 
             </div>
+
+            <div className="flex items-center gap-3 mb-6 mt-12">
+               <div className="p-3 rounded-xl bg-green-500/10 border border-green-500/20 text-green-500">
+                  <ShieldAlert className="w-6 h-6" />
+               </div>
+               <div>
+                 <h2 className="text-3xl font-bold">{t('tips.title')}</h2>
+                 <p className="text-[var(--muted-foreground)]">{t('tips.subtitle')}</p>
+               </div>
+            </div>
+            <EVTips />
+
          </section>
       </div>
     </main>

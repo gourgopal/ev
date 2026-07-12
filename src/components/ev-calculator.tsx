@@ -2,24 +2,24 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useEV } from "@/components/ev-provider";
-import { 
-  BatteryCharging, 
-  Zap, 
-  Info, 
-  Search, 
-  ChevronDown, 
-  Activity, 
-  PlayCircle, 
-  StopCircle, 
-  Fuel, 
-  AlertTriangle, 
-  TrendingDown, 
+import {
+  BatteryCharging,
+  Zap,
+  Info,
+  Search,
+  ChevronDown,
+  Activity,
+  PlayCircle,
+  StopCircle,
+  Fuel,
+  AlertTriangle,
+  TrendingDown,
   Clock3,
   X,
   History,
   SignalHigh,
   Share2,
-  ShoppingCart
+  ShoppingCart,
 } from "lucide-react";
 import { EV_CARS, EVCar } from "@/lib/ev-cars";
 import { AffiliateCarousel } from "@/components/affiliate-carousel";
@@ -36,21 +36,33 @@ type ChargeHistoryItem = {
   rangeGained: number;
 };
 
-
-
-export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCar }) {
-  const [capacity, setCapacity] = useState<number | string>(initialCar?.capacity || 40.5);
-  const [customRange, setCustomRange] = useState<number | string>(initialCar?.range || 263);
+export default function EVChargingCalculator({
+  initialCar,
+}: {
+  initialCar?: EVCar;
+}) {
+  const [capacity, setCapacity] = useState<number | string>(
+    initialCar?.capacity || 40.5,
+  );
+  const [customRange, setCustomRange] = useState<number | string>(
+    initialCar?.range || 263,
+  );
   const [startSoc, setStartSoc] = useState<number | string>(20);
   const [endSoc, setEndSoc] = useState<number | string>(100);
   const [chargerKw, setChargerKw] = useState<number | string>(30);
   const [efficiency, setEfficiency] = useState<number | string>(90);
-  const [curveType, setCurveType] = useState<"conservative" | "aggressive" | "linear">("conservative");
-  const [rangeUnit, setRangeUnit] = useState<"km" | "miles">(initialCar?.rangeUnit || "km");
+  const [curveType, setCurveType] = useState<
+    "conservative" | "aggressive" | "linear"
+  >("conservative");
+  const [rangeUnit, setRangeUnit] = useState<"km" | "miles">(
+    initialCar?.rangeUnit || "km",
+  );
 
   // Advanced State
   const [whPerKm, setWhPerKm] = useState<number | string>(
-     initialCar ? Math.round((initialCar.capacity * 1000) / initialCar.range) : 154
+    initialCar
+      ? Math.round((initialCar.capacity * 1000) / initialCar.range)
+      : 154,
   );
   const [simSpeed, setSimSpeed] = useState<number>(1);
 
@@ -63,35 +75,41 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
   // Searchable Dropdown State
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCar, setSelectedCar] = useState<EVCar | null>(initialCar || null);
-  
+  const [selectedCar, setSelectedCar] = useState<EVCar | null>(
+    initialCar || null,
+  );
+
   // Advanced Settings State
   const [showAdvanced, setShowAdvanced] = useState(false);
-  
-  const { 
-    isSimulating, 
-    isPaused, 
-    simSoc, 
+
+  const {
+    isSimulating,
+    isPaused,
+    simSoc,
     chargeHistory,
     completedSummary,
     setCompletedSummary,
     setChargeHistory,
-    startSimulation, 
-    stopSimulation, 
-    pauseSimulation, 
+    startSimulation,
+    stopSimulation,
+    pauseSimulation,
     resumeSimulation,
-    clearHistory
+    clearHistory,
   } = useEV();
 
   const [showHistory, setShowHistory] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const shareRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsDropdownOpen(false);
       }
     }
@@ -102,26 +120,28 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
   // Smart defaults for charger cost and petrol based on currency
   useEffect(() => {
     const kw = Number(chargerKw);
-    if (currency === '₹') {
+    if (currency === "₹") {
       setPetrolPrice(110);
       setCostPerKwh(kw <= 11 ? 8 : 24);
-    } else if (currency === '$') {
-      setPetrolPrice(1.20);
+    } else if (currency === "$") {
+      setPetrolPrice(1.2);
       setCostPerKwh(kw <= 11 ? 0.15 : 0.45);
-    } else if (currency === '€') {
-      setPetrolPrice(1.70);
-      setCostPerKwh(kw <= 11 ? 0.25 : 0.60);
-    } else if (currency === '£') {
-      setPetrolPrice(1.50);
+    } else if (currency === "€") {
+      setPetrolPrice(1.7);
+      setCostPerKwh(kw <= 11 ? 0.25 : 0.6);
+    } else if (currency === "£") {
+      setPetrolPrice(1.5);
       setCostPerKwh(kw <= 11 ? 0.22 : 0.55);
-    } else if (currency === '¥') {
+    } else if (currency === "¥") {
       setPetrolPrice(170);
       setCostPerKwh(kw <= 11 ? 30 : 80);
     }
   }, [chargerKw, currency]);
 
-  const filteredCars = EV_CARS.filter(car => 
-    `${car.brand} ${car.model}`.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredCars = EV_CARS.filter((car) =>
+    `${car.brand} ${car.model}`
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase()),
   );
 
   const handleCarSelect = (car: EVCar | null) => {
@@ -149,7 +169,11 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
 
     if (numStart >= numEnd) return null;
     const effectiveKw = numCharger * (numEff / 100);
-    const calculatePhase = (start: number, end: number, powerMultiplier: number) => {
+    const calculatePhase = (
+      start: number,
+      end: number,
+      powerMultiplier: number,
+    ) => {
       if (numStart >= end || numEnd <= start) return 0;
       const effectiveStart = Math.max(numStart, start);
       const effectiveEnd = Math.min(numEnd, end);
@@ -170,7 +194,7 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
       phases = [
         { name: "Bulk Charge (to 80%)", time: phase1 },
         { name: "Taper (80-90%)", time: phase2 },
-        { name: "Trickle (90-100%)", time: phase3 }
+        { name: "Trickle (90-100%)", time: phase3 },
       ];
     } else if (curveType === "aggressive") {
       const phase1 = calculatePhase(0, 95, 1);
@@ -178,7 +202,7 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
       totalHours = phase1 + phase2;
       phases = [
         { name: "Bulk Charge (to 95%)", time: phase1 },
-        { name: "Trickle (95-100%)", time: phase2 }
+        { name: "Trickle (95-100%)", time: phase2 },
       ];
     } else {
       totalHours = calculatePhase(0, 100, 1);
@@ -187,29 +211,33 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
 
     const hrs = Math.floor(totalHours);
     const mins = Math.round((totalHours - hrs) * 60);
-    
+
     // Economics calculations
-    const energyRequiredGrid = ((numEnd - numStart) / 100) * numCap / (numEff/100);
+    const energyRequiredGrid =
+      (((numEnd - numStart) / 100) * numCap) / (numEff / 100);
     const totalCost = energyRequiredGrid * numCost;
-    
+
     // Range calculations
     const carRange = numRange;
     const rangeGained = carRange * ((numEnd - numStart) / 100);
-    
+
     // ICE Savings
     const iceFuelRequired = rangeGained / numIceEff;
     const iceCost = iceFuelRequired * numPetrol;
     const savings = iceCost - totalCost;
 
-    return { 
-      hrs, 
-      mins, 
-      totalHours, 
-      phases: phases.filter(p => p.time > 0),
+    const costPerUnit = rangeGained > 0 ? totalCost / rangeGained : 0;
+
+    return {
+      hrs,
+      mins,
+      totalHours,
+      phases: phases.filter((p) => p.time > 0),
       totalCost,
       rangeGained,
       iceCost,
-      savings
+      savings,
+      costPerUnit,
     };
   };
 
@@ -222,7 +250,7 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
     }
 
     if (!result) return;
-    
+
     const numStart = Number(startSoc) || 0;
     const numEnd = Number(endSoc) || 0;
 
@@ -239,9 +267,11 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
       costPerKwh: Number(costPerKwh) || 0,
       chargerKw: Number(chargerKw) || 0,
       customRange: Number(customRange) || 0,
-      carModel: selectedCar ? `${selectedCar.brand} ${selectedCar.model}` : "Custom Vehicle",
+      carModel: selectedCar
+        ? `${selectedCar.brand} ${selectedCar.model}`
+        : "Custom Vehicle",
       currency,
-      intervalSpeed
+      intervalSpeed,
     });
   };
 
@@ -254,14 +284,14 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
   };
 
   const toggleUnit = () => {
-    setRangeUnit(prev => {
-      const isCurrentlyKm = prev === 'km';
+    setRangeUnit((prev) => {
+      const isCurrentlyKm = prev === "km";
       const factor = isCurrentlyKm ? 0.621371 : 1.60934;
       const whFactor = isCurrentlyKm ? 1.60934 : 0.621371;
-      setCustomRange(r => Math.round(Number(r) * factor));
-      setIceEfficiency(e => Number(Number(e) * factor).toFixed(1));
-      setWhPerKm(w => Math.round(Number(w) * whFactor));
-      return isCurrentlyKm ? 'miles' : 'km';
+      setCustomRange((r) => Math.round(Number(r) * factor));
+      setIceEfficiency((e) => Number(Number(e) * factor).toFixed(1));
+      setWhPerKm((w) => Math.round(Number(w) * whFactor));
+      return isCurrentlyKm ? "miles" : "km";
     });
   };
 
@@ -270,23 +300,25 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
     setIsSharing(true);
     try {
       const blob = await toBlob(shareRef.current, {
-        backgroundColor: '#0a0a0a',
+        backgroundColor: "#0a0a0a",
         pixelRatio: 2,
       });
       if (!blob) throw new Error("Could not create image blob");
-      
-      const file = new File([blob], 'ev-charging-receipt.png', { type: 'image/png' });
+
+      const file = new File([blob], "ev-charging-receipt.png", {
+        type: "image/png",
+      });
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({
           files: [file],
-          title: 'EV Charging Receipt',
-          text: 'Here is my EV charging session receipt!',
+          title: "EV Charging Receipt",
+          text: "Here is my EV charging session receipt!",
         });
       } else {
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = url;
-        a.download = 'ev-charging-receipt.png';
+        a.download = "ev-charging-receipt.png";
         a.click();
         URL.revokeObjectURL(url);
       }
@@ -300,35 +332,42 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
-
       <div className="flex flex-col-reverse lg:grid lg:grid-cols-12 gap-8">
-        
         {/* Left Column: Inputs */}
         <div className="lg:col-span-7 space-y-6">
-          
           {/* Vehicle Details */}
           <div className="bg-[#0a0a0a] border border-green-500/30 p-6 rounded-3xl text-green-400 font-mono shadow-[0_0_20px_rgba(34,197,94,0.1)] relative z-40">
-            <h3 className="text-lg font-bold mb-4 flex items-center gap-2"><Zap className="text-green-500 w-5 h-5"/> VEHICLE CONFIGURATION</h3>
-            
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+              <Zap className="text-green-500 w-5 h-5" /> VEHICLE CONFIGURATION
+            </h3>
+
             <div className="space-y-4">
               <div className="relative z-40">
-                <label className="block text-sm text-green-500/60 mb-1">Select Vehicle Model</label>
+                <label className="block text-sm text-green-500/60 mb-1">
+                  Select Vehicle Model
+                </label>
                 <div className="relative" ref={dropdownRef}>
-                  <button 
+                  <button
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                     className="w-full text-left bg-[#0a0a0a] border border-green-500/30 rounded-xl text-green-300 px-4 py-2 flex items-center justify-between hover:border-primary transition-colors focus:outline-none focus:ring-2 focus:ring-green-500/30"
                   >
-                    <span className="truncate">{selectedCar ? `${selectedCar.brand} ${selectedCar.model} (${selectedCar.capacity} kWh)` : "Custom Vehicle"}</span>
-                    <ChevronDown className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                    <span className="truncate">
+                      {selectedCar
+                        ? `${selectedCar.brand} ${selectedCar.model} (${selectedCar.capacity} kWh)`
+                        : "Custom Vehicle"}
+                    </span>
+                    <ChevronDown
+                      className={`w-4 h-4 transition-transform ${isDropdownOpen ? "rotate-180" : ""}`}
+                    />
                   </button>
-                  
+
                   {isDropdownOpen && (
                     <div className="absolute z-10 top-full left-0 right-0 mt-2 bg-[#0a0a0a]/95 backdrop-blur-2xl border border-green-500/50 shadow-[0_0_30px_rgba(34,197,94,0.2)] rounded-xl shadow-2xl overflow-hidden max-h-72 flex flex-col ring-1 ring-green-500/30">
                       <div className="p-2 border-b border-green-500/30 bg-[#0a0a0a]">
                         <div className="relative">
                           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-green-500/60" />
-                          <input 
-                            type="text" 
+                          <input
+                            type="text"
                             placeholder="Search Make or Model..."
                             className="w-full bg-[#0a0a0a] border border-green-500/30 text-green-300 rounded-lg pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500/50"
                             value={searchQuery}
@@ -345,7 +384,9 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
                           Custom Vehicle
                         </button>
                         {filteredCars.length === 0 ? (
-                          <div className="p-4 text-center text-sm text-green-500/60">No vehicles found</div>
+                          <div className="p-4 text-center text-sm text-green-500/60">
+                            No vehicles found
+                          </div>
                         ) : (
                           filteredCars.map((car, idx) => (
                             <button
@@ -354,10 +395,17 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
                               className="w-full text-left px-3 py-2 rounded-lg hover:bg-primary/10 transition-colors flex justify-between items-center group"
                             >
                               <div className="flex flex-col">
-                                <span className="font-semibold text-sm group-hover:text-green-300 transition-colors">{car.brand} {car.model}</span>
-                                <span className="text-xs text-green-500/60">{car.country} • Est. Range: {car.range} {car.rangeUnit}</span>
+                                <span className="font-semibold text-sm group-hover:text-green-300 transition-colors">
+                                  {car.brand} {car.model}
+                                </span>
+                                <span className="text-xs text-green-500/60">
+                                  {car.country} • Est. Range: {car.range}{" "}
+                                  {car.rangeUnit}
+                                </span>
                               </div>
-                              <span className="text-sm font-mono bg-green-950/40 px-2 py-1 rounded border border-green-500/20 text-green-300">{car.capacity} kWh • {car.batteryType}</span>
+                              <span className="text-sm font-mono bg-green-950/40 px-2 py-1 rounded border border-green-500/20 text-green-300">
+                                {car.capacity} kWh • {car.batteryType}
+                              </span>
                             </button>
                           ))
                         )}
@@ -369,36 +417,48 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
 
               {/* Unit & Currency Toggles */}
               <div className="flex justify-between items-center mb-2">
-                 <div className="flex items-center gap-2">
-                    <span className="text-sm text-green-500/60">Currency:</span>
-                    <select 
-                      value={currency} 
-                      onChange={(e) => setCurrency(e.target.value)}
-                      className="bg-[#0a0a0a] border border-green-500/30 text-green-300 rounded px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-green-500 cursor-pointer"
-                    >
-                      <option value="₹">INR (₹)</option>
-                      <option value="$">USD ($)</option>
-                      <option value="€">EUR (€)</option>
-                      <option value="£">GBP (£)</option>
-                      <option value="¥">JPY (¥)</option>
-                    </select>
-                 </div>
-                 
-                 <div className="flex items-center gap-2">
-                   <span className={`text-sm ${rangeUnit === 'km' ? 'font-bold text-primary' : 'text-green-500/60'}`}>km</span>
-                   <button 
-                      onClick={toggleUnit}
-                      className="w-12 h-6 bg-green-950/40 border border-green-500/30 rounded-full relative flex items-center p-1 cursor-pointer transition-colors hover:bg-green-500/20"
-                   >
-                      <div className={`w-4 h-4 bg-green-500 rounded-full shadow-[0_0_10px_rgba(34,197,94,0.8)] transform transition-transform duration-300 ${rangeUnit === 'miles' ? 'translate-x-6' : ''}`}></div>
-                   </button>
-                   <span className={`text-sm ${rangeUnit === 'miles' ? 'font-bold text-primary' : 'text-green-500/60'}`}>miles</span>
-                 </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-green-500/60">Currency:</span>
+                  <select
+                    value={currency}
+                    onChange={(e) => setCurrency(e.target.value)}
+                    className="bg-[#0a0a0a] border border-green-500/30 text-green-300 rounded px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-green-500 cursor-pointer"
+                  >
+                    <option value="₹">INR (₹)</option>
+                    <option value="$">USD ($)</option>
+                    <option value="€">EUR (€)</option>
+                    <option value="£">GBP (£)</option>
+                    <option value="¥">JPY (¥)</option>
+                  </select>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`text-sm ${rangeUnit === "km" ? "font-bold text-primary" : "text-green-500/60"}`}
+                  >
+                    km
+                  </span>
+                  <button
+                    onClick={toggleUnit}
+                    className="w-12 h-6 bg-green-950/40 border border-green-500/30 rounded-full relative flex items-center p-1 cursor-pointer transition-colors hover:bg-green-500/20"
+                  >
+                    <div
+                      className={`w-4 h-4 bg-green-500 rounded-full shadow-[0_0_10px_rgba(34,197,94,0.8)] transform transition-transform duration-300 ${rangeUnit === "miles" ? "translate-x-6" : ""}`}
+                    ></div>
+                  </button>
+                  <span
+                    className={`text-sm ${rangeUnit === "miles" ? "font-bold text-primary" : "text-green-500/60"}`}
+                  >
+                    miles
+                  </span>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Battery Capacity (kWh)</label>
+                  <label className="block text-sm font-medium mb-1">
+                    Battery Capacity (kWh)
+                  </label>
                   <input
                     type="number"
                     value={capacity}
@@ -407,37 +467,50 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
                   />
                 </div>
                 <div>
-                   <label className="block text-sm font-medium mb-1">Max Range ({rangeUnit})</label>
-                    <input
-                      type="number"
-                      value={customRange}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setCustomRange(val);
-                        const numVal = parseFloat(val) || 0;
-                        const numCap = Number(capacity) || 0;
-                        if (numVal > 0 && numCap > 0) setWhPerKm(Math.round((numCap * 1000) / numVal));
-                      }}
-                      className="w-full p-2.5 rounded-lg border border-green-500/30 bg-green-950/10 focus:ring-2 focus:ring-green-500 text-green-300 outline-none"
-                    />
+                  <label className="block text-sm font-medium mb-1">
+                    Max Range ({rangeUnit})
+                  </label>
+                  <input
+                    type="number"
+                    value={customRange}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setCustomRange(val);
+                      const numVal = parseFloat(val) || 0;
+                      const numCap = Number(capacity) || 0;
+                      if (numVal > 0 && numCap > 0)
+                        setWhPerKm(Math.round((numCap * 1000) / numVal));
+                    }}
+                    className="w-full p-2.5 rounded-lg border border-green-500/30 bg-green-950/10 focus:ring-2 focus:ring-green-500 text-green-300 outline-none"
+                  />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Start SoC (%)</label>
+                  <label className="block text-sm font-medium mb-1">
+                    Start SoC (%)
+                  </label>
                   <input
-                    type="number" min="0" max="99"
+                    type="number"
+                    min="0"
+                    max="99"
                     value={isSimulating ? simSoc : startSoc}
-                    onChange={(e) => !isSimulating && setStartSoc(e.target.value)}
+                    onChange={(e) =>
+                      !isSimulating && setStartSoc(e.target.value)
+                    }
                     disabled={isSimulating}
-                    className={`w-full p-2.5 rounded-lg border border-green-500/30 bg-green-950/10 focus:ring-2 focus:ring-green-500 text-green-300 outline-none ${isSimulating ? 'text-primary font-bold animate-pulse' : ''}`}
+                    className={`w-full p-2.5 rounded-lg border border-green-500/30 bg-green-950/10 focus:ring-2 focus:ring-green-500 text-green-300 outline-none ${isSimulating ? "text-primary font-bold animate-pulse" : ""}`}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">End SoC (%)</label>
+                  <label className="block text-sm font-medium mb-1">
+                    End SoC (%)
+                  </label>
                   <input
-                    type="number" min="1" max="100"
+                    type="number"
+                    min="1"
+                    max="100"
                     value={endSoc}
                     onChange={(e) => setEndSoc(e.target.value)}
                     disabled={isSimulating}
@@ -446,32 +519,39 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4 pt-4 border-t border-green-500/30 mt-4">
-                 <div>
-                    <label tabIndex={0} className="flex items-center gap-1 text-sm font-medium mb-1 w-max group relative cursor-help outline-none">
-                      Charger (kW) <Info className="w-3.5 h-3.5 text-green-500/60" />
-                      <span className="absolute bottom-full left-0 mb-2 w-48 p-2 bg-black/95 border border-green-500/50 backdrop-blur-sm text-green-400 text-[10px] rounded opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity pointer-events-none z-50">Power delivered by the charger (e.g. 7.2 for Home AC, 50 for Fast DC).</span>
-                    </label>
-                    <input
-                      type="number" step="0.1"
-                      value={chargerKw}
-                      onChange={(e) => setChargerKw(e.target.value)}
-                      className="w-full p-2.5 rounded-lg border border-green-500/30 bg-green-950/10 focus:ring-2 focus:ring-green-500 text-green-300 outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label tabIndex={0} className="flex items-center gap-1 text-sm font-medium mb-1 w-max group relative cursor-help outline-none">
-                      Cost ({currency}/kWh) <Info className="w-3.5 h-3.5 text-green-500/60" />
-                      <span className="absolute bottom-full right-0 mb-2 w-48 p-2 bg-black/95 border border-green-500/50 backdrop-blur-sm text-green-400 text-[10px] rounded opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity pointer-events-none z-50">Your home electricity tariff or public charging rate.</span>
-                    </label>
-                    <input
-                      type="number" step="0.1"
-                      value={costPerKwh}
-                      onChange={(e) => setCostPerKwh(e.target.value)}
-                      className="w-full p-2.5 rounded-lg border border-green-500/30 bg-green-950/10 focus:ring-2 focus:ring-green-500 text-green-300 outline-none"
-                    />
-                  </div>
+                <div>
+                  <label
+                    tabIndex={0}
+                    className="flex items-center gap-1 text-sm font-medium mb-1 w-max group relative cursor-help outline-none"
+                  >
+                    Charger (kW){" "}
+                    <Info className="w-3.5 h-3.5 text-green-500/60" />
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={chargerKw}
+                    onChange={(e) => setChargerKw(e.target.value)}
+                    className="w-full p-2.5 rounded-lg border border-green-500/30 bg-green-950/10 focus:ring-2 focus:ring-green-500 text-green-300 outline-none"
+                  />
+                </div>
+                <div>
+                  <label
+                    tabIndex={0}
+                    className="flex items-center gap-1 text-sm font-medium mb-1 w-max group relative cursor-help outline-none"
+                  >
+                    Cost ({currency}/kWh){" "}
+                    <Info className="w-3.5 h-3.5 text-green-500/60" />
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={costPerKwh}
+                    onChange={(e) => setCostPerKwh(e.target.value)}
+                    className="w-full p-2.5 rounded-lg border border-green-500/30 bg-green-950/10 focus:ring-2 focus:ring-green-500 text-green-300 outline-none"
+                  />
+                </div>
               </div>
-
             </div>
           </div>
 
@@ -482,117 +562,189 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
           >
             {showAdvanced ? "Hide Advanced Options" : "Show Advanced Options"}
           </button>
-          
-          
+
           {showAdvanced && (
             <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in zoom-in-95 duration-200">
               <div className="bg-[#0a0a0a] border border-green-500/50 rounded-2xl w-full max-w-lg shadow-[0_0_50px_rgba(34,197,94,0.15)] overflow-hidden flex flex-col relative max-h-[90vh] text-green-400 font-mono">
                 <div className="p-5 flex justify-between items-center border-b border-green-500/30 bg-[#0a0a0a]">
                   <h3 className="text-lg font-bold">Advanced Settings</h3>
-                  <button onClick={() => setShowAdvanced(false)} className="p-2 hover:bg-green-950/40 border border-green-500/30 rounded-full transition-colors text-green-500/60 hover:text-foreground">
-                     <X className="w-5 h-5" />
+                  <button
+                    onClick={() => setShowAdvanced(false)}
+                    className="p-2 hover:bg-green-950/40 border border-green-500/30 rounded-full transition-colors text-green-500/60 hover:text-foreground"
+                  >
+                    <X className="w-5 h-5" />
                   </button>
                 </div>
-                
+
                 <div className="p-5 overflow-y-auto custom-scrollbar space-y-6 bg-[#0a0a0a]">
                   <div>
-                    <label className="block text-sm font-medium mb-2">Charging Curve / Taper</label>
+                    <label className="block text-sm font-medium mb-2">
+                      Charging Curve / Taper
+                    </label>
                     <div className="flex flex-col gap-2">
                       <label className="flex items-center gap-2 cursor-pointer text-sm p-2 rounded border border-green-500/30 hover:bg-green-500/10 transition-colors">
-                        <input type="radio" checked={curveType === "conservative"} onChange={() => setCurveType("conservative")} className="accent-green-500" />
+                        <input
+                          type="radio"
+                          checked={curveType === "conservative"}
+                          onChange={() => setCurveType("conservative")}
+                          className="accent-green-500"
+                        />
                         <div>
-                          <span className="font-semibold block">Conservative (e.g., Tata EZ Charge)</span>
-                          <span className="text-green-500/60 text-xs">Slows at 80%, drops heavily at 90%</span>
+                          <span className="font-semibold block">
+                            Conservative (e.g., Tata EZ Charge)
+                          </span>
+                          <span className="text-green-500/60 text-xs">
+                            Slows at 80%, drops heavily at 90%
+                          </span>
                         </div>
                       </label>
                       <label className="flex items-center gap-2 cursor-pointer text-sm p-2 rounded border border-green-500/30 hover:bg-green-500/10 transition-colors">
-                        <input type="radio" checked={curveType === "aggressive"} onChange={() => setCurveType("aggressive")} className="accent-green-500" />
+                        <input
+                          type="radio"
+                          checked={curveType === "aggressive"}
+                          onChange={() => setCurveType("aggressive")}
+                          className="accent-green-500"
+                        />
                         <div>
-                          <span className="font-semibold block">Aggressive (e.g., Relux)</span>
-                          <span className="text-green-500/60 text-xs">Full speed until 95%, then slows</span>
+                          <span className="font-semibold block">
+                            Aggressive (e.g., Relux)
+                          </span>
+                          <span className="text-green-500/60 text-xs">
+                            Full speed until 95%, then slows
+                          </span>
                         </div>
                       </label>
                       <label className="flex items-center gap-2 cursor-pointer text-sm p-2 rounded border border-green-500/30 hover:bg-green-500/10 transition-colors">
-                        <input type="radio" checked={curveType === "linear"} onChange={() => setCurveType("linear")} className="accent-green-500" />
+                        <input
+                          type="radio"
+                          checked={curveType === "linear"}
+                          onChange={() => setCurveType("linear")}
+                          className="accent-green-500"
+                        />
                         <div>
-                          <span className="font-semibold block">Linear (Home AC)</span>
-                          <span className="text-green-500/60 text-xs">Constant speed, ignores tapering</span>
+                          <span className="font-semibold block">
+                            Linear (Home AC)
+                          </span>
+                          <span className="text-green-500/60 text-xs">
+                            Constant speed, ignores tapering
+                          </span>
                         </div>
                       </label>
                     </div>
                   </div>
 
-                  
                   <div className="pt-4 border-t border-green-500/30">
-                     <h4 className="text-sm font-bold text-green-500 mb-4">Internal Combustion Engine (ICE) Comparison</h4>
-                     <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label tabIndex={0} className="flex items-center gap-1 text-xs font-medium mb-1 w-max group relative cursor-help outline-none">
-                            Petrol Cost ({currency}/L) <Info className="w-3.5 h-3.5 text-green-500/60" />
-                            <span className="absolute bottom-full left-0 mb-2 w-48 p-2 bg-black/95 border border-green-500/50 backdrop-blur-sm text-green-400 text-[10px] rounded opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity pointer-events-none z-50">Current price of petrol or diesel in your area.</span>
-                          </label>
-                          <input
-                            type="number" step="1"
-                            value={petrolPrice}
-                            onChange={(e) => setPetrolPrice(e.target.value)}
-                            className="w-full p-2.5 rounded-lg border border-green-500/30 bg-green-950/10 focus:ring-2 focus:ring-green-500 text-green-300 outline-none"
-                          />
-                        </div>
-                        <div>
-                          <label tabIndex={0} className="flex items-center gap-1 text-xs font-medium mb-1 w-max group relative cursor-help outline-none">
-                            ICE Mileage ({rangeUnit}/L) <Info className="w-3.5 h-3.5 text-green-500/60" />
-                            <span className="absolute bottom-full right-0 mb-2 w-48 p-2 bg-black/95 border border-green-500/50 backdrop-blur-sm text-green-400 text-[10px] rounded opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity pointer-events-none z-50">Average mileage of a comparable internal combustion engine car.</span>
-                          </label>
-                          <input
-                            type="number" step="1"
-                            value={iceEfficiency}
-                            onChange={(e) => setIceEfficiency(e.target.value)}
-                            className="w-full p-2.5 rounded-lg border border-green-500/30 bg-green-950/10 focus:ring-2 focus:ring-green-500 text-green-300 outline-none"
-                          />
-                        </div>
-                     </div>
-                  </div>
-
-                  <div className="pt-4 border-t border-green-500/30">
-                     <label className="block text-sm font-medium mb-2">Efficiency (Wh/{rangeUnit})</label>
-                     <div className="flex gap-4 items-center">
+                    <h4 className="text-sm font-bold text-green-500 mb-4">
+                      Internal Combustion Engine (ICE) Comparison
+                    </h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label
+                          tabIndex={0}
+                          className="flex items-center gap-1 text-xs font-medium mb-1 w-max group relative cursor-help outline-none"
+                        >
+                          Petrol Cost ({currency}/L){" "}
+                          <Info className="w-3.5 h-3.5 text-green-500/60" />
+                        </label>
                         <input
                           type="number"
-                          value={whPerKm}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            setWhPerKm(val);
-                            const numVal = parseFloat(val) || 0;
-                            const numCap = Number(capacity) || 0;
-                            if (numVal > 0 && numCap > 0) setCustomRange(Math.round((numCap * 1000) / numVal));
-                          }}
-                          className="w-1/2 p-2.5 rounded-lg border border-green-500/30 bg-green-950/10 focus:ring-2 focus:ring-green-500 text-green-300 outline-none"
+                          step="1"
+                          value={petrolPrice}
+                          onChange={(e) => setPetrolPrice(e.target.value)}
+                          className="w-full p-2.5 rounded-lg border border-green-500/30 bg-green-950/10 focus:ring-2 focus:ring-green-500 text-green-300 outline-none"
                         />
-                        <span className="text-xs text-green-500/60 flex-1">Auto-syncs with Max Range.</span>
-                     </div>
+                      </div>
+                      <div>
+                        <label
+                          tabIndex={0}
+                          className="flex items-center gap-1 text-xs font-medium mb-1 w-max group relative cursor-help outline-none"
+                        >
+                          ICE Mileage ({rangeUnit}/L){" "}
+                          <Info className="w-3.5 h-3.5 text-green-500/60" />
+                        </label>
+                        <input
+                          type="number"
+                          step="1"
+                          value={iceEfficiency}
+                          onChange={(e) => setIceEfficiency(e.target.value)}
+                          className="w-full p-2.5 rounded-lg border border-green-500/30 bg-green-950/10 focus:ring-2 focus:ring-green-500 text-green-300 outline-none"
+                        />
+                      </div>
+                    </div>
                   </div>
 
                   <div className="pt-4 border-t border-green-500/30">
-                     <label className="block text-sm font-medium mb-2">Charging Efficiency (%)</label>
-                     <div className="flex gap-4 items-center">
-                        <input
-                          type="number" min="10" max="100"
-                          value={efficiency}
-                          onChange={(e) => setEfficiency(e.target.value)}
-                          className="w-1/2 p-2.5 rounded-lg border border-green-500/30 bg-green-950/10 focus:ring-2 focus:ring-green-500 text-green-300 outline-none"
-                        />
-                        <span className="text-xs text-green-500/60 flex-1">Default is 90% (10% lost to heat).</span>
-                     </div>
+                    <label className="block text-sm font-medium mb-2">
+                      Efficiency (Wh/{rangeUnit})
+                    </label>
+                    <div className="flex gap-4 items-center">
+                      <input
+                        type="number"
+                        value={whPerKm}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setWhPerKm(val);
+                          const numVal = parseFloat(val) || 0;
+                          const numCap = Number(capacity) || 0;
+                          if (numVal > 0 && numCap > 0)
+                            setCustomRange(
+                              Math.round((numCap * 1000) / numVal),
+                            );
+                        }}
+                        className="w-1/2 p-2.5 rounded-lg border border-green-500/30 bg-green-950/10 focus:ring-2 focus:ring-green-500 text-green-300 outline-none"
+                      />
+                      <span className="text-xs text-green-500/60 flex-1">
+                        Auto-syncs with Max Range.
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-green-500/30">
+                    <label className="block text-sm font-medium mb-2">
+                      Charging Efficiency (%)
+                    </label>
+                    <div className="flex gap-4 items-center">
+                      <input
+                        type="number"
+                        min="10"
+                        max="100"
+                        value={efficiency}
+                        onChange={(e) => setEfficiency(e.target.value)}
+                        className="w-1/2 p-2.5 rounded-lg border border-green-500/30 bg-green-950/10 focus:ring-2 focus:ring-green-500 text-green-300 outline-none"
+                      />
+                      <span className="text-xs text-green-500/60 flex-1">
+                        Default is 90% (10% lost to heat).
+                      </span>
+                    </div>
                   </div>
 
                   {result && (
                     <div className="mt-8 p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 text-sm flex gap-3">
                       <Info className="shrink-0 text-blue-500 h-5 w-5" />
                       <div className="text-green-500/60">
-                        <h4 className="font-semibold text-blue-500 mb-1">Power Loss Physics</h4>
+                        <h4 className="font-semibold text-blue-500 mb-1">
+                          Power Loss Physics
+                        </h4>
                         <p>
-                          Total battery energy required is <strong>{(((Number(endSoc) - Number(startSoc)) / 100) * Number(capacity)).toFixed(1)} kWh</strong>. 
-                          Due to {100 - Number(efficiency)}% efficiency loss, you will actually pull <strong>{(((Number(endSoc) - Number(startSoc)) / 100 * Number(capacity)) / (Number(efficiency)/100)).toFixed(1)} kWh</strong> from the grid to complete this charge.
+                          Total battery energy required is{" "}
+                          <strong>
+                            {(
+                              ((Number(endSoc) - Number(startSoc)) / 100) *
+                              Number(capacity)
+                            ).toFixed(1)}{" "}
+                            kWh
+                          </strong>
+                          . Due to {100 - Number(efficiency)}% efficiency loss,
+                          you will actually pull{" "}
+                          <strong>
+                            {(
+                              (((Number(endSoc) - Number(startSoc)) / 100) *
+                                Number(capacity)) /
+                              (Number(efficiency) / 100)
+                            ).toFixed(1)}{" "}
+                            kWh
+                          </strong>{" "}
+                          from the grid to complete this charge.
                         </p>
                       </div>
                     </div>
@@ -601,105 +753,136 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
               </div>
             </div>
           )}
-
         </div>
 
         {/* Right Column: Results Dashboard (Unified LED Screen) */}
         <div className="lg:col-span-5">
           <div className="rounded-3xl p-6 lg:p-8 lg:sticky lg:top-24 flex flex-col h-[550px] lg:h-full lg:min-h-[650px] space-y-4 lg:space-y-6 bg-[#0a0a0a] text-green-400 border border-green-500/30 relative overflow-hidden ring-1 ring-green-500/20 shadow-[0_0_40px_rgba(34,197,94,0.15)] font-mono">
-            
             {/* LCD Screen Lines Effect */}
             <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(255,255,255,0)_50%,rgba(0,0,0,1)_50%)] bg-[length:100%_4px] z-20"></div>
-            
+
             <div className="relative z-10 flex flex-col h-full justify-between">
               {/* Top Bar */}
               <div className="w-full flex justify-between items-center text-xs tracking-widest text-green-500/70 border-b border-green-500/20 pb-4">
-                <span className="flex items-center gap-2"><SignalHigh className="w-4 h-4" /> STATION: ONLINE</span>
+                <span className="flex items-center gap-2">
+                  <SignalHigh className="w-4 h-4" /> STATION: ONLINE
+                </span>
                 {isSimulating ? (
-                  <span className="animate-pulse text-amber-400">● CHARGING ACTIVE</span>
+                  <span className="animate-pulse text-amber-400">
+                    ● CHARGING ACTIVE
+                  </span>
                 ) : (
                   <span>● READY</span>
                 )}
               </div>
-              
+
               {/* Main LCD Display */}
               <div className="relative w-full py-4 lg:py-8 flex items-center justify-center group cursor-crosshair">
-                 {/* Circular Glow */}
-                 <div className={`absolute w-64 h-64 rounded-full blur-3xl opacity-30 ${isSimulating ? 'bg-amber-500/20 animate-pulse' : 'bg-green-500/10'}`}></div>
-                 
-                 {/* The SoC Text */}
-                 <div className={`text-[120px] font-black text-transparent bg-clip-text leading-none drop-shadow-[0_0_15px_rgba(74,222,128,0.5)] ${isSimulating ? 'bg-gradient-to-b from-amber-300 to-amber-600' : 'bg-gradient-to-b from-green-300 to-green-600'}`}>
-                    {isSimulating ? (
-                      <>
-                        {Math.floor(simSoc)}
-                        <span className="text-5xl">{(simSoc % 1).toFixed(2).substring(1)}%</span>
-                      </>
-                    ) : (
-                      <>
-                        {Math.floor(Number(startSoc))}
-                        <span className="text-5xl">{(Number(startSoc) % 1).toFixed(2).substring(1)}%</span>
-                      </>
-                    )}
-                 </div>
+                {/* Circular Glow */}
+                <div
+                  className={`absolute w-64 h-64 rounded-full blur-3xl opacity-30 ${isSimulating ? "bg-amber-500/20 animate-pulse" : "bg-green-500/10"}`}
+                ></div>
+
+                {/* The SoC Text */}
+                <div
+                  className={`text-[120px] font-black text-transparent bg-clip-text leading-none drop-shadow-[0_0_15px_rgba(74,222,128,0.5)] ${isSimulating ? "bg-gradient-to-b from-amber-300 to-amber-600" : "bg-gradient-to-b from-green-300 to-green-600"}`}
+                >
+                  {isSimulating ? (
+                    <>
+                      {Math.floor(simSoc)}
+                      <span className="text-5xl">
+                        {(simSoc % 1).toFixed(2).substring(1)}%
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      {Math.floor(Number(startSoc))}
+                      <span className="text-5xl">
+                        {(Number(startSoc) % 1).toFixed(2).substring(1)}%
+                      </span>
+                    </>
+                  )}
+                </div>
               </div>
-              
+
               {/* Target & Speed */}
               <div className="grid grid-cols-2 gap-4 text-center border-b border-green-500/20 pb-4 mb-4">
-                 <div>
-                   <p className="text-[10px] text-green-500/60 uppercase">Target SoC</p>
-                   <p className="text-2xl font-bold">{endSoc}%</p>
-                 </div>
-                 <div>
-                   <p className="text-[10px] text-green-500/60 uppercase">Output Power</p>
-                   <p className="text-2xl font-bold">{chargerKw} kW</p>
-                 </div>
+                <div>
+                  <p className="text-[10px] text-green-500/60 uppercase">
+                    Target SoC
+                  </p>
+                  <p className="text-2xl font-bold">{endSoc}%</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-green-500/60 uppercase">
+                    Output Power
+                  </p>
+                  <p className="text-2xl font-bold">{chargerKw} kW</p>
+                </div>
               </div>
 
               {/* Math Breakdown / Estimates */}
               {result ? (
-                <div className="space-y-4 mb-6 flex-grow flex flex-col">
-                   <div className="group relative" tabIndex={0}>
-                     <button className="flex items-center gap-2 text-xs text-green-500/60 hover:text-green-400 transition-colors uppercase tracking-widest font-bold font-mono">
-                       <Info className="w-3.5 h-3.5" /> View Session Metrics (1%)
-                     </button>
-                     <div className="absolute top-full mt-2 left-0 w-full bg-black/95 backdrop-blur-xl border border-green-500/50 rounded-xl p-4 text-xs leading-relaxed font-sans opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity pointer-events-none z-50 shadow-[0_0_20px_rgba(34,197,94,0.2)]">
-                       <p className="text-green-500 mb-2 uppercase tracking-widest font-bold text-[10px] font-mono">1% Charge Equivalents</p>
-                       <div className="grid grid-cols-1 gap-2">
-                         <div className="flex justify-between border-b border-green-500/20 pb-1"><span>Energy Required</span><strong className="text-green-300">{((Number(capacity) / (Number(efficiency)/100)) / 100).toFixed(2)} kWh</strong></div>
-                         <div className="flex justify-between border-b border-green-500/20 pb-1"><span>Estimated Cost</span><strong className="text-amber-400">{currency}{(((Number(capacity) / (Number(efficiency)/100)) / 100) * Number(costPerKwh)).toFixed(2)}</strong></div>
-                         <div className="flex justify-between"><span>Range Gained</span><strong className="text-green-300">+{Math.round(Number(customRange) / 100)} {rangeUnit}</strong></div>
-                       </div>
-                     </div>
-                   </div>
-                   
-                   <div className="grid grid-cols-2 gap-4 mt-auto">
-                      <div className="bg-green-950/20 p-3 rounded-lg border border-green-500/10">
-                        <p className="text-[10px] text-green-500/60 uppercase mb-1">Total Est. Cost</p>
-                        <p className="text-xl text-amber-400 font-bold">{currency}{isSimulating ? (((simSoc - Number(startSoc)) / 100) * Number(capacity) / (Number(efficiency)/100) * Number(costPerKwh)).toFixed(2) : result.totalCost.toFixed(2)}</p>
+                <div className="space-y-4 mb-6 flex-grow flex flex-col items-center justify-center py-8">
+                  {/* Primary Focus: TIME NEEDED */}
+                  <div className="text-center mb-6">
+                    <p className="text-sm text-green-500/80 uppercase tracking-widest font-bold mb-2">
+                      {isSimulating ? "Time Elapsed" : "Time Needed"}
+                    </p>
+                    {isSimulating ? (
+                      (() => {
+                        const elapsedMins =
+                          ((((simSoc - Number(startSoc)) / 100) *
+                            Number(capacity)) /
+                            (Number(efficiency) / 100) /
+                            (Number(chargerKw) * (Number(efficiency) / 100))) *
+                          60;
+                        const hrs = Math.floor(elapsedMins / 60);
+                        const mins = Math.floor(elapsedMins % 60);
+                        const secs = Math.floor((elapsedMins * 60) % 60);
+                        return (
+                          <div className="text-6xl md:text-8xl font-black font-mono text-green-400 drop-shadow-[0_0_15px_rgba(74,222,128,0.5)]">
+                            {hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m ${secs}s`}
+                          </div>
+                        );
+                      })()
+                    ) : (
+                      <div className="text-6xl md:text-8xl font-black font-mono text-green-400 drop-shadow-[0_0_15px_rgba(74,222,128,0.5)]">
+                        {result.hrs > 0
+                          ? `${result.hrs}h ${result.mins}m`
+                          : `${result.mins}m`}
                       </div>
-                      <div className="bg-green-950/20 p-3 rounded-lg border border-green-500/10">
-                        <p className="text-[10px] text-green-500/60 uppercase mb-1">Range Gained</p>
-                        <p className="text-xl text-green-400 font-bold">+{isSimulating ? Math.round(((simSoc - Number(startSoc)) / 100) * Number(customRange)) : Math.round(result.rangeGained)} {rangeUnit}</p>
-                      </div>
-                      <div className="bg-green-950/20 p-3 rounded-lg border border-green-500/10 col-span-2 flex justify-between items-center">
-                        <p className="text-[10px] text-green-500/60 uppercase mb-1">{isSimulating ? "Time Elapsed" : "Time Estimated"}</p>
-                        {isSimulating ? (() => {
-                          const elapsedMins = ((((simSoc - Number(startSoc)) / 100) * Number(capacity) / (Number(efficiency)/100)) / (Number(chargerKw) * (Number(efficiency)/100))) * 60;
-                          const hrs = Math.floor(elapsedMins / 60);
-                          const mins = Math.floor(elapsedMins % 60);
-                          const secs = Math.floor((elapsedMins * 60) % 60);
-                          return (
-                            <p className="text-xl font-bold text-white">
-                              {hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m ${secs}s`}
-                            </p>
-                          );
-                        })() : (
-                          <p className="text-xl font-bold text-white">
-                            {result.hrs > 0 ? `${result.hrs}h ${result.mins}m` : `${result.mins}m 0s`}
-                          </p>
-                        )}
-                      </div>
-                   </div>
+                    )}
+                  </div>
+
+                  {/* Secondary Focus: COST */}
+                  <div className="bg-green-950/20 px-8 py-4 rounded-2xl border border-green-500/30 text-center mb-6">
+                    <p className="text-[10px] text-green-500/60 uppercase mb-1">
+                      Total Estimated Cost
+                    </p>
+                    <p className="text-3xl text-amber-400 font-bold">
+                      {currency}
+                      {isSimulating
+                        ? (
+                            ((((simSoc - Number(startSoc)) / 100) *
+                              Number(capacity)) /
+                              (Number(efficiency) / 100)) *
+                            Number(costPerKwh)
+                          ).toFixed(2)
+                        : result.totalCost.toFixed(2)}
+                    </p>
+                    <p className="text-xs text-amber-500/60 mt-1">
+                      ~ {currency}
+                      {result.costPerUnit.toFixed(2)} per {rangeUnit}
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => setShowDetailsModal(true)}
+                    className="flex items-center gap-2 text-sm text-green-300 bg-green-500/10 px-6 py-3 rounded-full border border-green-500/30 hover:bg-green-500/20 transition-colors uppercase tracking-widest font-bold"
+                  >
+                    <Info className="w-4 h-4" /> See More Details
+                  </button>
                 </div>
               ) : (
                 <div className="flex-grow flex items-center justify-center text-red-400 border border-red-500/20 rounded-xl bg-red-950/20 p-4 text-sm text-center font-sans">
@@ -707,37 +890,130 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
                 </div>
               )}
 
-              {/* Affiliate Ad Banner */}
-              <AffiliateCarousel selectedCar={selectedCar} />
+              {/* Details Modal */}
+              {showDetailsModal && result && (
+                <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200 font-mono">
+                  <div className="bg-[#0a0a0a] border border-green-500/30 rounded-3xl w-full max-w-lg shadow-[0_0_50px_rgba(34,197,94,0.1)] overflow-hidden flex flex-col relative text-green-400 max-h-[90vh]">
+                    <div className="p-4 border-b border-green-500/30 flex justify-between items-center bg-green-950/20">
+                      <h3 className="font-bold flex items-center gap-2 text-green-300">
+                        <Activity className="w-5 h-5" /> Session Details
+                      </h3>
+                      <button
+                        onClick={() => setShowDetailsModal(false)}
+                        className="p-2 hover:bg-green-500/20 rounded-full transition-colors"
+                      >
+                        <X className="w-5 h-5 text-green-500" />
+                      </button>
+                    </div>
+
+                    <div className="p-6 overflow-y-auto space-y-6 custom-scrollbar">
+                      <div>
+                        <p className="text-green-500 mb-3 uppercase tracking-widest font-bold text-xs">
+                          1% Charge Equivalents
+                        </p>
+                        <div className="bg-green-950/20 rounded-xl border border-green-500/20 p-4 space-y-2 text-sm">
+                          <div className="flex justify-between border-b border-green-500/20 pb-2">
+                            <span>Energy Required</span>
+                            <strong className="text-green-300">
+                              {(
+                                Number(capacity) /
+                                (Number(efficiency) / 100) /
+                                100
+                              ).toFixed(2)}{" "}
+                              kWh
+                            </strong>
+                          </div>
+                          <div className="flex justify-between border-b border-green-500/20 pb-2">
+                            <span>Estimated Cost</span>
+                            <strong className="text-amber-400">
+                              {currency}
+                              {(
+                                (Number(capacity) /
+                                  (Number(efficiency) / 100) /
+                                  100) *
+                                Number(costPerKwh)
+                              ).toFixed(2)}
+                            </strong>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Range Gained</span>
+                            <strong className="text-green-300">
+                              +{Math.round(Number(customRange) / 100)}{" "}
+                              {rangeUnit}
+                            </strong>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <p className="text-green-500 mb-3 uppercase tracking-widest font-bold text-xs">
+                          Session Totals
+                        </p>
+                        <div className="bg-green-950/20 rounded-xl border border-green-500/20 p-4 space-y-2 text-sm">
+                          <div className="flex justify-between border-b border-green-500/20 pb-2">
+                            <span>Range Gained</span>
+                            <strong className="text-green-300">
+                              +{Math.round(result.rangeGained)} {rangeUnit}
+                            </strong>
+                          </div>
+                          <div className="flex justify-between border-b border-green-500/20 pb-2">
+                            <span>ICE Cost Equivalent</span>
+                            <strong className="text-red-400">
+                              {currency}
+                              {result.iceCost.toFixed(2)}
+                            </strong>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Total Savings</span>
+                            <strong className="text-green-400">
+                              {currency}
+                              {result.savings.toFixed(2)}
+                            </strong>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Controls */}
               <div className="mt-auto pt-4 border-t border-green-500/20">
                 {!isSimulating && (
                   <div className="flex justify-between items-center px-1 mb-3">
-                     <label className="text-xs text-green-500/60 uppercase flex items-center gap-1 group relative cursor-help outline-none" tabIndex={0}>⚡ Boost Charge <Info className="w-3 h-3"/><span className="absolute bottom-full left-0 mb-1 w-48 p-2 bg-black/90 backdrop-blur-sm text-white text-[10px] rounded opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity pointer-events-none z-50 normal-case tracking-normal">Artificially accelerates time to simulate a full session quickly. Does not affect real-world physics.</span></label>
-                     <select 
-                       value={simSpeed}
-                       onChange={(e) => setSimSpeed(Number(e.target.value))}
-                       className="bg-[#0a0a0a] border border-green-500/30 rounded text-xs p-1 outline-none focus:ring-1 focus:ring-green-500 text-green-400 font-mono cursor-pointer"
-                     >
-                       <option value={1}>1x (Real-Time)</option>
-                       <option value={60}>60x (Fast)</option>
-                       <option value={1000}>1000x (Ultra)</option>
-                       <option value={10000}>10000x (Instant)</option>
-                     </select>
+                    <label
+                      className="text-xs text-green-500/60 uppercase flex items-center gap-1 cursor-help"
+                      title="Artificially accelerates time to simulate a full session quickly. Does not affect real-world physics."
+                    >
+                      ⚡ Boost Charge <Info className="w-3 h-3" />
+                    </label>
+                    <select
+                      value={simSpeed}
+                      onChange={(e) => setSimSpeed(Number(e.target.value))}
+                      className="bg-[#0a0a0a] border border-green-500/30 rounded text-xs p-1 outline-none focus:ring-1 focus:ring-green-500 text-green-400 font-mono cursor-pointer"
+                    >
+                      <option value={1}>1x (Real-Time)</option>
+                      <option value={60}>60x (Fast)</option>
+                      <option value={1000}>1000x (Ultra)</option>
+                      <option value={10000}>10000x (Instant)</option>
+                    </select>
                   </div>
                 )}
-                
+
                 {isSimulating ? (
                   <div className="grid grid-cols-2 gap-4 w-full">
-                    <button 
+                    <button
                       onClick={togglePause}
                       className="w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 transition-all font-sans"
                     >
-                      {isPaused ? <PlayCircle className="w-5 h-5" /> : <Clock3 className="w-5 h-5" />}
+                      {isPaused ? (
+                        <PlayCircle className="w-5 h-5" />
+                      ) : (
+                        <Clock3 className="w-5 h-5" />
+                      )}
                       {isPaused ? "Resume" : "Pause"}
                     </button>
-                    <button 
+                    <button
                       onClick={toggleSimulation}
                       className="w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition-all font-sans shadow-[0_0_20px_rgba(239,68,68,0.1)]"
                     >
@@ -745,7 +1021,7 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
                     </button>
                   </div>
                 ) : (
-                  <button 
+                  <button
                     onClick={toggleSimulation}
                     disabled={!result}
                     className="w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all bg-green-500 text-[#0a0a0a] hover:bg-green-400 shadow-[0_0_20px_rgba(34,197,94,0.3)] disabled:opacity-50 font-sans"
@@ -754,10 +1030,14 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
                   </button>
                 )}
               </div>
-              
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Affiliate Ad Banner */}
+      <div className="mt-8">
+        <AffiliateCarousel selectedCar={selectedCar} />
       </div>
 
       {/* Completion Summary Dialog (LED Receipt) */}
@@ -765,62 +1045,98 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200 font-mono">
           <div className="bg-[#0a0a0a] border border-green-500/30 rounded-2xl w-full max-w-md shadow-[0_0_50px_rgba(34,197,94,0.1)] overflow-hidden flex flex-col relative text-green-400">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-600 to-green-400"></div>
-            
+
             <div ref={shareRef} className="p-6 bg-[#0a0a0a] relative">
               <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(255,255,255,0)_50%,rgba(0,0,0,1)_50%)] bg-[length:100%_4px] z-20"></div>
-              
+
               <div className="text-center mb-6 relative z-30">
                 <div className="mx-auto w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mb-4 border border-green-500/20 shadow-[0_0_15px_rgba(34,197,94,0.2)]">
                   <BatteryCharging className="w-8 h-8 text-green-400" />
                 </div>
-                <h2 className="text-2xl font-bold mb-1 tracking-widest text-green-300">SESSION COMPLETE</h2>
-                <p className="text-green-500/60 text-xs">STATION TRANSACTION RECEIPT</p>
-                <div className="text-[10px] text-green-500/40 mt-1">{new Date().toLocaleString()}</div>
+                <h2 className="text-2xl font-bold mb-1 tracking-widest text-green-300">
+                  SESSION COMPLETE
+                </h2>
+                <p className="text-green-500/60 text-xs">
+                  STATION TRANSACTION RECEIPT
+                </p>
+                <div className="text-[10px] text-green-500/40 mt-1">
+                  {new Date().toLocaleString()}
+                </div>
               </div>
-              
+
               <div className="space-y-4 relative z-30">
-                 <div className="grid grid-cols-2 gap-4">
-                   <div className="bg-green-950/40 p-3 rounded-lg border border-green-500/20 text-center">
-                      <p className="text-[10px] uppercase tracking-wider text-green-500/60 mb-1">State of Charge</p>
-                      <p className="font-bold text-lg text-green-300">{Math.floor(completedSummary.startSoc)}% → {Math.floor(completedSummary.endSoc)}%</p>
-                   </div>
-                   <div className="bg-green-950/40 p-3 rounded-lg border border-green-500/20 text-center">
-                      <p className="text-[10px] uppercase tracking-wider text-green-500/60 mb-1">Time Elapsed</p>
-                      <p className="font-bold text-lg text-green-300">{completedSummary.timeMins} mins</p>
-                   </div>
-                 </div>
-                 
-                 <div className="bg-green-950/20 p-4 rounded-lg border border-green-500/20 space-y-3">
-                    <div className="flex justify-between items-center border-b border-green-500/20 pb-2">
-                      <span className="text-sm text-green-500/80">Vehicle Model</span>
-                      <span className="font-bold text-green-300 text-right">{completedSummary.carModel || "Custom EV"}</span>
-                    </div>
-                    <div className="flex justify-between items-center border-b border-green-500/20 pb-2">
-                      <span className="text-sm text-green-500/80">Range Added</span>
-                      <span className="font-bold text-green-300">+{completedSummary.rangeGained} {rangeUnit}</span>
-                    </div>
-                    <div className="flex justify-between items-center border-b border-green-500/20 pb-2">
-                      <span className="text-sm text-green-500/80">Energy Delivered</span>
-                      <span className="font-bold text-green-300">{completedSummary.energy} kWh</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-green-500/80">Total Cost</span>
-                      <span className="font-bold text-amber-400 text-xl">{currency}{completedSummary.cost}</span>
-                    </div>
-                 </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-green-950/40 p-3 rounded-lg border border-green-500/20 text-center">
+                    <p className="text-[10px] uppercase tracking-wider text-green-500/60 mb-1">
+                      State of Charge
+                    </p>
+                    <p className="font-bold text-lg text-green-300">
+                      {Math.floor(completedSummary.startSoc)}% →{" "}
+                      {Math.floor(completedSummary.endSoc)}%
+                    </p>
+                  </div>
+                  <div className="bg-green-950/40 p-3 rounded-lg border border-green-500/20 text-center">
+                    <p className="text-[10px] uppercase tracking-wider text-green-500/60 mb-1">
+                      Time Elapsed
+                    </p>
+                    <p className="font-bold text-lg text-green-300">
+                      {completedSummary.timeMins} mins
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-green-950/20 p-4 rounded-lg border border-green-500/20 space-y-3">
+                  <div className="flex justify-between items-center border-b border-green-500/20 pb-2">
+                    <span className="text-sm text-green-500/80">
+                      Vehicle Model
+                    </span>
+                    <span className="font-bold text-green-300 text-right">
+                      {completedSummary.carModel || "Custom EV"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center border-b border-green-500/20 pb-2">
+                    <span className="text-sm text-green-500/80">
+                      Range Added
+                    </span>
+                    <span className="font-bold text-green-300">
+                      +{completedSummary.rangeGained} {rangeUnit}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center border-b border-green-500/20 pb-2">
+                    <span className="text-sm text-green-500/80">
+                      Energy Delivered
+                    </span>
+                    <span className="font-bold text-green-300">
+                      {completedSummary.energy} kWh
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-green-500/80">
+                      Total Cost
+                    </span>
+                    <span className="font-bold text-amber-400 text-xl">
+                      {currency}
+                      {completedSummary.cost}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
-            
+
             <div className="p-4 grid grid-cols-2 gap-3 border-t border-green-500/20 bg-[#0a0a0a] relative z-30 font-sans">
-              <button 
+              <button
                 onClick={handleShare}
                 disabled={isSharing}
                 className="w-full py-3 bg-green-500/10 text-green-400 font-bold rounded-xl border border-green-500/30 hover:bg-green-500/20 transition-all flex justify-center items-center gap-2"
               >
-                {isSharing ? <Clock3 className="w-5 h-5 animate-spin" /> : <Share2 className="w-5 h-5" />}
+                {isSharing ? (
+                  <Clock3 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <Share2 className="w-5 h-5" />
+                )}
                 {isSharing ? "Generating..." : "Share Receipt"}
               </button>
-              <button 
+              <button
                 onClick={() => setCompletedSummary(null)}
                 className="w-full py-3 bg-green-500 text-[#0a0a0a] font-bold rounded-xl hover:bg-green-400 transition-all"
               >
@@ -837,28 +1153,51 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
           <div className="w-full max-w-md bg-[var(--background)] h-full shadow-2xl border-l border-[var(--glass-border)] flex flex-col animate-in slide-in-from-right">
             <div className="p-4 border-b border-[var(--glass-border)] flex justify-between items-center bg-[#0a0a0a]">
               <h3 className="text-lg font-bold flex items-center gap-2">
-                <Clock3 className="text-primary w-5 h-5"/> Charging History
+                <Clock3 className="text-primary w-5 h-5" /> Charging History
               </h3>
-              <button onClick={() => setShowHistory(false)} className="p-2 hover:bg-green-950/40 border border-green-500/30 rounded-full transition-colors">
+              <button
+                onClick={() => setShowHistory(false)}
+                className="p-2 hover:bg-green-950/40 border border-green-500/30 rounded-full transition-colors"
+              >
                 <X className="w-5 h-5 text-green-500/60 hover:text-foreground" />
               </button>
             </div>
             <div className="p-4 space-y-3 overflow-y-auto custom-scrollbar flex-grow">
               {chargeHistory.length === 0 ? (
-                <p className="text-center text-green-500/60 py-8">No charging sessions yet.</p>
+                <p className="text-center text-green-500/60 py-8">
+                  No charging sessions yet.
+                </p>
               ) : (
-                chargeHistory.map(session => (
-                  <div key={session.id} className="bg-[#0a0a0a] border border-[var(--glass-border)] rounded-xl p-4 text-sm flex justify-between items-center hover:border-primary/50 transition-colors shadow-sm">
-                     <div className="flex flex-col gap-1">
-                        <span className="font-bold text-lg">{session.startSoc}% → {session.endSoc}%</span>
-                        <span className="text-green-500/60 text-xs">{session.date.toLocaleDateString()} {session.date.toLocaleTimeString()}</span>
-                        <span className="text-green-500/60 text-xs mt-1 bg-[var(--glass-border)]/50 px-2 py-0.5 rounded-full inline-block w-max">{session.carModel || "Custom"} • {session.chargerType || "Unknown"}</span>
-                     </div>
-                     <div className="flex flex-col items-end text-right gap-1">
-                        <span className="font-mono text-green-500 font-bold text-base">+{session.rangeGained} {rangeUnit}</span>
-                        <span className="text-green-500/60 text-xs font-mono">{currency}{session.cost} • {session.energy} kWh</span>
-                        <span className="text-green-500/60 text-xs mt-1">{session.timeMins} mins</span>
-                     </div>
+                chargeHistory.map((session) => (
+                  <div
+                    key={session.id}
+                    className="bg-[#0a0a0a] border border-[var(--glass-border)] rounded-xl p-4 text-sm flex justify-between items-center hover:border-primary/50 transition-colors shadow-sm"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <span className="font-bold text-lg">
+                        {session.startSoc}% → {session.endSoc}%
+                      </span>
+                      <span className="text-green-500/60 text-xs">
+                        {session.date.toLocaleDateString()}{" "}
+                        {session.date.toLocaleTimeString()}
+                      </span>
+                      <span className="text-green-500/60 text-xs mt-1 bg-[var(--glass-border)]/50 px-2 py-0.5 rounded-full inline-block w-max">
+                        {session.carModel || "Custom"} •{" "}
+                        {session.chargerType || "Unknown"}
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-end text-right gap-1">
+                      <span className="font-mono text-green-500 font-bold text-base">
+                        +{session.rangeGained} {rangeUnit}
+                      </span>
+                      <span className="text-green-500/60 text-xs font-mono">
+                        {currency}
+                        {session.cost} • {session.energy} kWh
+                      </span>
+                      <span className="text-green-500/60 text-xs mt-1">
+                        {session.timeMins} mins
+                      </span>
+                    </div>
                   </div>
                 ))
               )}
