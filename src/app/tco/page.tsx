@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { TrendingDown, Car, BatteryCharging, Share2, Clock3, LineChart as LineChartIcon } from "lucide-react";
 import { I18nProvider, useI18n } from "@/components/i18n-provider";
 import { toBlob } from "html-to-image";
+import { AffiliateCarousel } from "@/components/affiliate-carousel";
 import {
   LineChart,
   Line,
@@ -47,7 +48,7 @@ function TCOContent() {
     setIsSharing(true);
     try {
       const blob = await toBlob(shareRef.current, {
-        backgroundColor: 'var(--background)',
+        backgroundColor: '#0a0a0a',
         pixelRatio: 2,
         style: { margin: '0' }
       });
@@ -77,7 +78,7 @@ function TCOContent() {
   };
 
   const data = [];
-  let breakEvenYear = null;
+  let breakEvenYear: number | null = null;
 
   for (let i = 0; i <= years; i++) {
     const evCumulative = evPrice + (evRunningCostPerKm * yearlyMileage + evMaintenance + evInsurance) * i;
@@ -97,22 +98,23 @@ function TCOContent() {
   const finalEVSavings = data[years]["ICE Cost"] - data[years]["EV Cost"];
 
   return (
-    <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] selection:bg-primary/30 pt-8 pb-32">
+    <main className="min-h-screen bg-[#0a0a0a] text-white selection:bg-green-500/30 pt-8 pb-32">
       <div className="container mx-auto px-4 max-w-6xl">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold mb-2 flex items-center justify-center gap-2">
-            <TrendingDown className="text-primary w-8 h-8" /> TCO Analysis (15 Years)
+            <TrendingDown className="text-green-500 w-8 h-8 drop-shadow-[0_0_10px_rgba(34,197,94,0.5)]" /> 
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-emerald-600 font-mono">TCO ANALYSIS ({years} YRS)</span>
           </h1>
-          <p className="text-[var(--muted-foreground)]">Compare Total Cost of Ownership: Electric vs Combustion (ICE)</p>
+          <p className="text-gray-400">Compare Total Cost of Ownership: Electric vs Combustion (ICE)</p>
         </div>
 
         <div className="flex justify-center gap-4 mb-8">
            <div className="flex items-center gap-2">
-              <span className="text-sm text-[var(--muted-foreground)]">Currency:</span>
+              <span className="text-sm text-gray-400">Currency:</span>
               <select 
                 value={currency} 
                 onChange={(e) => setCurrency(e.target.value)}
-                className="bg-[var(--card-bg)] border border-[var(--glass-border)] rounded px-3 py-1.5 text-sm outline-none focus:ring-1 focus:ring-primary cursor-pointer"
+                className="bg-green-950/20 border border-green-500/30 rounded px-3 py-1.5 text-sm outline-none focus:ring-1 focus:ring-green-500 cursor-pointer text-green-300 font-mono"
               >
                 <option value="₹">INR (₹)</option>
                 <option value="$">USD ($)</option>
@@ -122,11 +124,11 @@ function TCOContent() {
               </select>
            </div>
            <div className="flex items-center gap-2">
-              <span className="text-sm text-[var(--muted-foreground)]">Years:</span>
+              <span className="text-sm text-gray-400">Years:</span>
               <select 
                 value={years} 
                 onChange={(e) => setYears(Number(e.target.value))}
-                className="bg-[var(--card-bg)] border border-[var(--glass-border)] rounded px-3 py-1.5 text-sm outline-none focus:ring-1 focus:ring-primary cursor-pointer"
+                className="bg-green-950/20 border border-green-500/30 rounded px-3 py-1.5 text-sm outline-none focus:ring-1 focus:ring-green-500 cursor-pointer text-green-300 font-mono"
               >
                 <option value={5}>5 Years</option>
                 <option value={10}>10 Years</option>
@@ -141,12 +143,12 @@ function TCOContent() {
           <div className="lg:col-span-5 space-y-6">
             
             {/* Global Settings */}
-            <div className="glass-panel p-6">
-               <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">Driving Habits</h2>
+            <div className="p-6 rounded-3xl bg-green-950/10 border border-green-500/20">
+               <h3 className="text-lg font-bold mb-4 flex items-center gap-2"><Car className="text-green-500 w-5 h-5"/> DRIVING HABITS</h3>
                <div>
-                  <div className="flex justify-between items-center mb-1">
-                     <label className="text-sm font-medium">Yearly Mileage (km)</label>
-                     <span className="text-primary font-mono">{yearlyMileage.toLocaleString()} km</span>
+                  <div className="flex justify-between items-center mb-2">
+                     <label className="text-sm font-medium text-green-300">Yearly Mileage (km)</label>
+                     <span className="text-green-400 font-mono text-lg">{yearlyMileage.toLocaleString()}</span>
                   </div>
                   <input
                     type="range"
@@ -155,131 +157,133 @@ function TCOContent() {
                     step="1000"
                     value={yearlyMileage}
                     onChange={(e) => setYearlyMileage(Number(e.target.value))}
-                    className="w-full accent-primary"
+                    className="w-full accent-green-500 h-1.5 bg-green-950 rounded-lg appearance-none cursor-pointer"
                   />
                </div>
             </div>
 
             {/* EV Inputs */}
-            <div className="glass-panel p-6 border-l-4 border-l-primary">
-               <h2 className="text-lg font-semibold mb-4 flex items-center gap-2"><BatteryCharging className="w-5 h-5 text-primary" /> EV Assumptions</h2>
+            <div className="p-6 rounded-3xl bg-green-950/20 border border-green-500/30">
+               <h3 className="text-lg font-bold mb-4 flex items-center gap-2"><BatteryCharging className="w-5 h-5 text-green-500" /> EV ASSUMPTIONS</h3>
                <div className="grid grid-cols-2 gap-4">
                   <div className="col-span-2">
-                    <label className="block text-sm font-medium mb-1">Upfront Price ({currency})</label>
-                    <input type="number" value={evPrice} onChange={(e) => setEvPrice(Number(e.target.value))} className="w-full p-2.5 rounded-lg border border-[var(--glass-border)] bg-[var(--background)]/50 outline-none focus:border-primary" />
+                    <label className="block text-sm font-medium mb-1 text-green-300">Upfront Price ({currency})</label>
+                    <input type="number" value={evPrice} onChange={(e) => setEvPrice(Number(e.target.value))} className="w-full p-2.5 rounded-lg border border-green-500/30 bg-green-950/10 focus:ring-2 focus:ring-green-500 text-green-300 outline-none font-mono" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Efficiency (Wh/km)</label>
-                    <input type="number" value={evEfficiency} onChange={(e) => setEvEfficiency(Number(e.target.value))} className="w-full p-2.5 rounded-lg border border-[var(--glass-border)] bg-[var(--background)]/50 outline-none focus:border-primary" />
+                    <label className="block text-sm font-medium mb-1 text-green-300">Efficiency (Wh/km)</label>
+                    <input type="number" value={evEfficiency} onChange={(e) => setEvEfficiency(Number(e.target.value))} className="w-full p-2.5 rounded-lg border border-green-500/30 bg-green-950/10 focus:ring-2 focus:ring-green-500 text-green-300 outline-none font-mono" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Elec Cost ({currency}/kWh)</label>
-                    <input type="number" value={elecCost} onChange={(e) => setElecCost(Number(e.target.value))} className="w-full p-2.5 rounded-lg border border-[var(--glass-border)] bg-[var(--background)]/50 outline-none focus:border-primary" />
+                    <label className="block text-sm font-medium mb-1 text-green-300">Elec Cost ({currency}/kWh)</label>
+                    <input type="number" value={elecCost} onChange={(e) => setElecCost(Number(e.target.value))} className="w-full p-2.5 rounded-lg border border-green-500/30 bg-green-950/10 focus:ring-2 focus:ring-green-500 text-green-300 outline-none font-mono" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Yearly Maint. ({currency})</label>
-                    <input type="number" value={evMaintenance} onChange={(e) => setEvMaintenance(Number(e.target.value))} className="w-full p-2.5 rounded-lg border border-[var(--glass-border)] bg-[var(--background)]/50 outline-none focus:border-primary" />
+                    <label className="block text-sm font-medium mb-1 text-green-300">Yearly Maint. ({currency})</label>
+                    <input type="number" value={evMaintenance} onChange={(e) => setEvMaintenance(Number(e.target.value))} className="w-full p-2.5 rounded-lg border border-green-500/30 bg-green-950/10 focus:ring-2 focus:ring-green-500 text-green-300 outline-none font-mono" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Yearly Insur. ({currency})</label>
-                    <input type="number" value={evInsurance} onChange={(e) => setEvInsurance(Number(e.target.value))} className="w-full p-2.5 rounded-lg border border-[var(--glass-border)] bg-[var(--background)]/50 outline-none focus:border-primary" />
+                    <label className="block text-sm font-medium mb-1 text-green-300">Yearly Insur. ({currency})</label>
+                    <input type="number" value={evInsurance} onChange={(e) => setEvInsurance(Number(e.target.value))} className="w-full p-2.5 rounded-lg border border-green-500/30 bg-green-950/10 focus:ring-2 focus:ring-green-500 text-green-300 outline-none font-mono" />
                   </div>
                </div>
             </div>
 
             {/* ICE Inputs */}
-            <div className="glass-panel p-6 border-l-4 border-l-red-500">
-               <h2 className="text-lg font-semibold mb-4 flex items-center gap-2"><Car className="w-5 h-5 text-red-500" /> ICE Assumptions</h2>
+            <div className="p-6 rounded-3xl bg-orange-950/20 border border-orange-500/30">
+               <h3 className="text-lg font-bold mb-4 flex items-center gap-2"><Car className="w-5 h-5 text-orange-500" /> ICE ASSUMPTIONS</h3>
                <div className="grid grid-cols-2 gap-4">
                   <div className="col-span-2">
-                    <label className="block text-sm font-medium mb-1">Upfront Price ({currency})</label>
-                    <input type="number" value={icePrice} onChange={(e) => setIcePrice(Number(e.target.value))} className="w-full p-2.5 rounded-lg border border-[var(--glass-border)] bg-[var(--background)]/50 outline-none focus:border-red-500" />
+                    <label className="block text-sm font-medium mb-1 text-orange-300">Upfront Price ({currency})</label>
+                    <input type="number" value={icePrice} onChange={(e) => setIcePrice(Number(e.target.value))} className="w-full p-2.5 rounded-lg border border-orange-500/30 bg-orange-950/10 focus:ring-2 focus:ring-orange-500 text-orange-300 outline-none font-mono" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Efficiency (km/L)</label>
-                    <input type="number" value={iceEfficiency} onChange={(e) => setIceEfficiency(Number(e.target.value))} className="w-full p-2.5 rounded-lg border border-[var(--glass-border)] bg-[var(--background)]/50 outline-none focus:border-red-500" />
+                    <label className="block text-sm font-medium mb-1 text-orange-300">Efficiency (km/L)</label>
+                    <input type="number" value={iceEfficiency} onChange={(e) => setIceEfficiency(Number(e.target.value))} className="w-full p-2.5 rounded-lg border border-orange-500/30 bg-orange-950/10 focus:ring-2 focus:ring-orange-500 text-orange-300 outline-none font-mono" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Fuel Cost ({currency}/L)</label>
-                    <input type="number" value={fuelCost} onChange={(e) => setFuelCost(Number(e.target.value))} className="w-full p-2.5 rounded-lg border border-[var(--glass-border)] bg-[var(--background)]/50 outline-none focus:border-red-500" />
+                    <label className="block text-sm font-medium mb-1 text-orange-300">Fuel Cost ({currency}/L)</label>
+                    <input type="number" value={fuelCost} onChange={(e) => setFuelCost(Number(e.target.value))} className="w-full p-2.5 rounded-lg border border-orange-500/30 bg-orange-950/10 focus:ring-2 focus:ring-orange-500 text-orange-300 outline-none font-mono" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Yearly Maint. ({currency})</label>
-                    <input type="number" value={iceMaintenance} onChange={(e) => setIceMaintenance(Number(e.target.value))} className="w-full p-2.5 rounded-lg border border-[var(--glass-border)] bg-[var(--background)]/50 outline-none focus:border-red-500" />
+                    <label className="block text-sm font-medium mb-1 text-orange-300">Yearly Maint. ({currency})</label>
+                    <input type="number" value={iceMaintenance} onChange={(e) => setIceMaintenance(Number(e.target.value))} className="w-full p-2.5 rounded-lg border border-orange-500/30 bg-orange-950/10 focus:ring-2 focus:ring-orange-500 text-orange-300 outline-none font-mono" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Yearly Insur. ({currency})</label>
-                    <input type="number" value={iceInsurance} onChange={(e) => setIceInsurance(Number(e.target.value))} className="w-full p-2.5 rounded-lg border border-[var(--glass-border)] bg-[var(--background)]/50 outline-none focus:border-red-500" />
+                    <label className="block text-sm font-medium mb-1 text-orange-300">Yearly Insur. ({currency})</label>
+                    <input type="number" value={iceInsurance} onChange={(e) => setIceInsurance(Number(e.target.value))} className="w-full p-2.5 rounded-lg border border-orange-500/30 bg-orange-950/10 focus:ring-2 focus:ring-orange-500 text-orange-300 outline-none font-mono" />
                   </div>
                </div>
             </div>
+            
+            {/* Affiliate Ad Banner */}
+            <div className="hidden lg:block">
+              <AffiliateCarousel selectedCar={null} />
+            </div>
           </div>
 
-          {/* Chart Column */}
-          <div className="lg:col-span-7 flex flex-col gap-6">
-             <div className="glass-panel p-6 lg:p-8 flex-1 min-h-[500px] flex flex-col">
-                <h2 className="text-xl font-bold mb-6 flex items-center gap-2"><LineChartIcon className="text-primary"/> Cost Trajectory</h2>
-                
-                <div className="flex-1 w-full h-full min-h-[400px]">
+          {/* Chart Column (Results) */}
+          <div className="lg:col-span-7 flex flex-col gap-6 lg:sticky lg:top-24 h-auto lg:h-[calc(100vh-8rem)]">
+             {/* Results Summary */}
+             <div ref={shareRef} className="bg-green-950/10 p-6 rounded-3xl border border-green-500/20 shadow-[0_0_15px_rgba(34,197,94,0.1)] -mx-4 md:mx-0">
+               <div className="flex justify-between items-center mb-6">
+                 <h2 className="font-bold text-xl tracking-wider flex items-center gap-2"><LineChartIcon className="text-green-500"/> ANALYSIS SUMMARY</h2>
+                 <button 
+                    onClick={handleShare}
+                    disabled={isSharing}
+                    className="flex items-center gap-1.5 text-xs font-semibold text-green-400 bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 px-3 py-1.5 rounded transition-colors"
+                  >
+                    {isSharing ? <Clock3 className="w-4 h-4 animate-spin" /> : <Share2 className="w-4 h-4" />}
+                    {isSharing ? "GENERATING..." : "SHARE RESULT"}
+                  </button>
+               </div>
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className={`p-6 rounded-2xl border ${breakEvenYear ? 'bg-green-500/10 border-green-500/30 shadow-[inset_0_0_20px_rgba(34,197,94,0.1)]' : 'bg-red-500/10 border-red-500/30'}`}>
+                     <h3 className="text-xs font-bold uppercase tracking-widest text-green-500/80 mb-2">Break-Even Point</h3>
+                     <div className="text-4xl font-black font-mono tracking-tighter text-green-400 drop-shadow-[0_0_5px_rgba(74,222,128,0.5)]">
+                       {breakEvenYear ? `YEAR ${breakEvenYear}` : "NEVER"}
+                     </div>
+                     <p className="text-xs mt-2 text-green-300/70">
+                       {breakEvenYear ? `EV becomes cheaper to own in year ${breakEvenYear}.` : `EV upfront premium too high.`}
+                     </p>
+                  </div>
+  
+                  <div className={`p-6 rounded-2xl border ${finalEVSavings > 0 ? 'bg-green-500/10 border-green-500/30 shadow-[inset_0_0_20px_rgba(34,197,94,0.1)]' : 'bg-red-500/10 border-red-500/30'}`}>
+                     <h3 className="text-xs font-bold uppercase tracking-widest text-green-500/80 mb-2">Net Savings ({years} Yrs)</h3>
+                     <div className={`text-4xl font-black font-mono tracking-tighter drop-shadow-[0_0_5px_rgba(74,222,128,0.5)] ${finalEVSavings > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                       {finalEVSavings > 0 ? '+' : ''}{currency}{(Math.abs(finalEVSavings)/100000).toFixed(2)}L
+                     </div>
+                     <p className="text-xs mt-2 text-green-300/70">
+                       Difference in total out-of-pocket costs at year {years}.
+                     </p>
+                  </div>
+               </div>
+               
+               <div className="mt-6 flex-1 w-full h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart
                       data={data}
-                      margin={{
-                        top: 5,
-                        right: 30,
-                        left: 20,
-                        bottom: 5,
-                      }}
+                      margin={{ top: 5, right: 10, left: -20, bottom: 5 }}
                     >
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(150,150,150,0.1)" />
-                      <XAxis dataKey="year" stroke="var(--muted-foreground)" fontSize={12} />
-                      <YAxis stroke="var(--muted-foreground)" fontSize={12} tickFormatter={(val) => `${currency}${(val/100000).toFixed(1)}L`} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(34,197,94,0.1)" vertical={false} />
+                      <XAxis dataKey="year" stroke="rgba(34,197,94,0.5)" fontSize={12} tickLine={false} axisLine={false} />
+                      <YAxis stroke="rgba(34,197,94,0.5)" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `${currency}${(val/100000).toFixed(1)}L`} />
                       <Tooltip 
-                        contentStyle={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--glass-border)', borderRadius: '0.5rem' }}
+                        contentStyle={{ backgroundColor: 'rgba(0,0,0,0.9)', borderColor: 'rgba(34,197,94,0.3)', borderRadius: '0.5rem', color: '#4ade80' }}
+                        itemStyle={{ color: '#4ade80', fontFamily: 'monospace' }}
                         formatter={(value: any) => [`${currency}${Number(value).toLocaleString()}`, undefined]}
                       />
-                      <Legend />
-                      <Line type="monotone" dataKey="EV Cost" stroke="var(--primary)" strokeWidth={4} dot={false} activeDot={{ r: 8 }} />
-                      <Line type="monotone" dataKey="ICE Cost" stroke="#ef4444" strokeWidth={4} dot={false} activeDot={{ r: 8 }} />
+                      <Legend iconType="circle" />
+                      <Line type="monotone" dataKey="EV Cost" stroke="#4ade80" strokeWidth={4} dot={false} activeDot={{ r: 8, fill: '#4ade80' }} style={{ filter: 'drop-shadow(0px 0px 5px rgba(74,222,128,0.5))' }} />
+                      <Line type="monotone" dataKey="ICE Cost" stroke="#f97316" strokeWidth={4} dot={false} activeDot={{ r: 8, fill: '#f97316' }} style={{ filter: 'drop-shadow(0px 0px 5px rgba(249,115,22,0.5))' }} />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
              </div>
 
-             {/* Results Summary */}
-             <div ref={shareRef} className="bg-[var(--background)] p-4 rounded-xl -mx-4 md:mx-0">
-               <div className="flex justify-between items-center mb-4 px-2">
-                 <h2 className="font-bold text-lg tracking-wider">Analysis Summary</h2>
-                 <button 
-                    onClick={handleShare}
-                    disabled={isSharing}
-                    className="flex items-center gap-1.5 text-xs font-semibold text-primary bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-full transition-colors"
-                  >
-                    {isSharing ? <Clock3 className="w-4 h-4 animate-spin" /> : <Share2 className="w-4 h-4" />}
-                    {isSharing ? "Generating..." : "Share Result"}
-                  </button>
-               </div>
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className={`glass-panel p-6 ${breakEvenYear ? 'bg-green-500/10 border-green-500/30' : 'bg-red-500/10 border-red-500/30'}`}>
-                     <h3 className="text-sm uppercase tracking-widest text-[var(--muted-foreground)] mb-2">Break-Even Point</h3>
-                     <div className="text-3xl font-black font-mono">
-                       {breakEvenYear ? `Year ${breakEvenYear}` : "Never"}
-                     </div>
-                     <p className="text-sm mt-2">
-                       {breakEvenYear ? `The EV becomes cheaper to own in year ${breakEvenYear}.` : `The EV upfront premium is too high to recover with these running costs.`}
-                     </p>
-                  </div>
-  
-                  <div className="glass-panel p-6">
-                     <h3 className="text-sm uppercase tracking-widest text-[var(--muted-foreground)] mb-2">Total Net Savings ({years} Yrs)</h3>
-                     <div className={`text-3xl font-black font-mono ${finalEVSavings > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                       {finalEVSavings > 0 ? '+' : ''}{currency}{finalEVSavings.toLocaleString()}
-                     </div>
-                     <p className="text-sm mt-2 text-[var(--muted-foreground)]">
-                       Difference in total out-of-pocket costs at the end of year {years}.
-                     </p>
-                  </div>
-               </div>
+             {/* Affiliate Ad Banner on Mobile */}
+             <div className="block lg:hidden mt-4">
+               <AffiliateCarousel selectedCar={null} />
              </div>
           </div>
         </div>
