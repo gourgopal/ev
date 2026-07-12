@@ -349,8 +349,9 @@ export default function EVChargingCalculator({
   }, []);
 
   return (
+    <>
     <div className="container mx-auto px-4 py-8 max-w-6xl">
-      <div className="flex flex-col-reverse lg:grid lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
         {/* Left Column: Inputs */}
         <div className="lg:col-span-6 space-y-6">
           {/* Vehicle Details */}
@@ -513,7 +514,7 @@ export default function EVChargingCalculator({
                     type="number"
                     min="0"
                     max="99"
-                    value={isSimulating ? simSoc : startSoc}
+                    value={isSimulating ? Number(simSoc).toFixed(0) : startSoc}
                     onChange={(e) =>
                       !isSimulating && setStartSoc(e.target.value)
                     }
@@ -775,7 +776,7 @@ export default function EVChargingCalculator({
 
         {/* Right Column: Results Dashboard (Unified LED Screen) */}
         <div className="lg:col-span-6">
-          <div className="rounded-3xl p-6 lg:p-8 lg:sticky lg:top-24 flex flex-col h-[550px] lg:h-full lg:min-h-[650px] space-y-4 lg:space-y-6 bg-[#0a0a0a] text-green-400 border border-green-500/30 relative overflow-hidden ring-1 ring-green-500/20 shadow-[0_0_40px_rgba(34,197,94,0.15)] font-mono">
+          <div className="rounded-3xl p-6 lg:p-8 lg:sticky lg:top-24 flex flex-col h-full space-y-4 lg:space-y-6 bg-[#0a0a0a] text-green-400 border border-green-500/30 relative overflow-hidden ring-1 ring-green-500/20 shadow-[0_0_40px_rgba(34,197,94,0.15)] font-mono">
             {/* LCD Screen Lines Effect */}
             <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(255,255,255,0)_50%,rgba(0,0,0,1)_50%)] bg-[length:100%_4px] z-20"></div>
 
@@ -843,6 +844,7 @@ export default function EVChargingCalculator({
                      <div className="flex gap-2 mt-4 text-[10px] text-green-500/50 uppercase tracking-widest font-mono">
                         <span className={`w-2 h-2 rounded-full ${lcdScreenIndex === 0 ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]' : 'bg-green-500/20'}`}></span>
                         <span className={`w-2 h-2 rounded-full ${lcdScreenIndex === 1 ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]' : 'bg-green-500/20'}`}></span>
+                        <span className={`w-2 h-2 rounded-full ${lcdScreenIndex === 2 ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]' : 'bg-green-500/20'}`}></span>
                      </div>
                    </div>
 
@@ -874,11 +876,56 @@ export default function EVChargingCalculator({
                         </div>
                       ) : (
                         <div className="text-green-500/50">Awaiting simulation data...</div>
-                      )}
-                   </div>
+                      )}                       </div>
+                     </div>
 
-                 </div>
-              </div>
+                   {/* SLIDE 3: Charging Progress (Time Elapsed/Remaining) */}
+                   <div className="w-1/3 flex flex-col items-center justify-center px-4 shrink-0">
+                     <div className="bg-[#0f0f0f] border border-green-500/20 rounded-xl p-6 w-full max-w-sm relative">
+                       <div className="text-[10px] text-green-500/50 uppercase tracking-widest mb-4 border-b border-green-500/20 pb-2">Charge Progress ({startSoc}% → {endSoc}%)</div>
+                       
+                       <div className="space-y-4 font-[family-name:var(--font-share-tech-mono)]">
+                         <div className="flex justify-between items-center">
+                           <span className="text-green-500/70 text-sm">Elapsed</span>
+                           <span className="text-xl text-green-400">
+                             {isSimulating ? (() => {
+                               const elapsedMins = ((((simSoc - Number(startSoc)) / 100) * Number(capacity) / (Number(efficiency)/100)) / (Number(chargerKw) * (Number(efficiency)/100))) * 60;
+                               const hrs = Math.floor(elapsedMins / 60);
+                               const mins = Math.floor(elapsedMins % 60);
+                               return hrs > 0 ? `${hrs}H ${mins}M` : `${mins}M`;
+                             })() : "0M"}
+                           </span>
+                         </div>
+                         <div className="flex justify-between items-center">
+                           <span className="text-green-500/70 text-sm">Remaining</span>
+                           <span className="text-xl text-amber-400">
+                             {isSimulating ? (() => {
+                               const totalMins = ((((Number(endSoc) - Number(startSoc)) / 100) * Number(capacity) / (Number(efficiency)/100)) / (Number(chargerKw) * (Number(efficiency)/100))) * 60;
+                               const elapsedMins = ((((simSoc - Number(startSoc)) / 100) * Number(capacity) / (Number(efficiency)/100)) / (Number(chargerKw) * (Number(efficiency)/100))) * 60;
+                               const remMins = Math.max(0, totalMins - elapsedMins);
+                               const hrs = Math.floor(remMins / 60);
+                               const mins = Math.floor(remMins % 60);
+                               return hrs > 0 ? `${hrs}H ${mins}M` : `${mins}M`;
+                             })() : (result ? (result.hrs > 0 ? `${result.hrs}H ${result.mins}M` : `${result.mins}M`) : "0M")}
+                           </span>
+                         </div>
+                         <div className="flex justify-between items-center">
+                           <span className="text-green-500/70 text-sm">Time Left</span>
+                           <span className="text-2xl font-bold text-green-300">
+                             {isSimulating ? (() => {
+                               const totalMins = ((((Number(endSoc) - Number(startSoc)) / 100) * Number(capacity) / (Number(efficiency)/100)) / (Number(chargerKw) * (Number(efficiency)/100))) * 60;
+                               const elapsedMins = ((((simSoc - Number(startSoc)) / 100) * Number(capacity) / (Number(efficiency)/100)) / (Number(chargerKw) * (Number(efficiency)/100))) * 60;
+                               const remMins = Math.max(0, totalMins - elapsedMins);
+                               const hrs = Math.floor(remMins / 60);
+                               const mins = Math.floor(remMins % 60);
+                               return hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
+                             })() : (result ? (result.hrs > 0 ? `${result.hrs}h ${result.mins}m` : `${result.mins}m`) : "0m")}
+                           </span>
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+                </div>
 
               {/* Details Modal */}
               {showDetailsModal && result && (
@@ -1147,5 +1194,6 @@ export default function EVChargingCalculator({
         </div>
       )}
     </div>
+    </>
   );
 }
