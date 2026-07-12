@@ -50,8 +50,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             });
             setIsPremium(false);
           }
-        } catch (error) {
-          console.error("Error fetching user data:", error);
+        } catch (error: any) {
+          if (error?.message?.includes("offline")) {
+            console.warn("Firebase offline: user data fetch delayed.");
+          } else {
+            console.error("Error fetching user data:", error);
+          }
           setIsPremium(false);
         }
       } else {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import html2canvas from "html2canvas";
+import { toBlob } from "html-to-image";
 import { EV_CARS, EVCar } from "@/lib/ev-cars";
 import { ChevronDown, Search, Thermometer, Wind, Zap, Navigation, Users, Lightbulb, Music, Battery, Map, Settings2, Share2, Gauge, CircleDashed } from "lucide-react";
 import { I18nProvider, useI18n } from "@/components/i18n-provider";
@@ -139,11 +139,10 @@ function RangeCalculatorContent() {
     if (!shareRef.current) return;
     setIsSharing(true);
     try {
-      const canvas = await html2canvas(shareRef.current, {
+      const blob = await toBlob(shareRef.current, {
         backgroundColor: document.documentElement.classList.contains('dark') ? '#0f172a' : '#ffffff',
-        scale: 2,
+        pixelRatio: 2,
       });
-      const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/png'));
       if (!blob) throw new Error("Could not create image blob");
       
       const file = new File([blob], 'ev-range-estimate.png', { type: 'image/png' });
