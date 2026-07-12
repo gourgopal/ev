@@ -35,9 +35,9 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
                    <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 flex justify-center gap-1 items-center">
                       <span className="w-2 h-2 bg-muted-foreground rounded-full"></span> Sponsored
                    </div>
-                   <h3 className="font-bold text-lg leading-tight mb-2">MRF Wanderer EV Tyres</h3>
-                   <p className="text-sm text-muted-foreground mb-4">Upgrade your Nexon EV with premium tubeless tyres designed for efficiency.</p>
-                   <a href="https://www.amazon.in/MRF-Wanderer-Street-Tubeless-Tyre/dp/B07GNTDNDJ?crid=15GBUH2IAI6QK&dib=eyJ2IjoiMSJ9.ByaoQS0-NgKxmtwOYA3qsfOwxjpqW3hk-hwPXKQGMT6thH7oq8PgsWpEsKDYchj3eW4MMJiTi8CIPJlxw3DG3964KZbS5OT2_oLTMTlQ2te5f8gW1S5Yx8sjt-dgcgp8hAW4k-i7mFATlcrasD9z1Y_e0FGTHkJ7SFWp5vQiE7MvyUYAhRvirmRWvPaZs_WMvyiJHPQbmvXkPdgePCD2QiU9ODuVRkTCS-a-arQpGW8.ONDIlr_gvc25Z9IDDKg3K9vsQm3wBbx4S5kjVDrbtBU&dib_tag=se&keywords=nexon+ev+tyre&qid=1783843955&sprefix=nexon+ev+tyr%2Caps%2C382&sr=8-3&linkCode=ll2&tag=evtime-21&linkId=c09c1ddbde8c4823bab3c28425616059&ref_=as_li_ss_tl" target="_blank" rel="noopener noreferrer" className="inline-block w-full py-2 bg-primary text-primary-foreground font-semibold rounded-lg hover:opacity-90 transition-opacity">
+                   <h3 className="font-bold text-lg leading-tight mb-2">StromPuls 7.5kW Portable Charger</h3>
+                   <p className="text-sm text-muted-foreground mb-4">Smart App, 2.6inch Screen, IP65, Adjustable Amp & 5 Years Warranty.</p>
+                   <a href="https://www.amazon.in/StromPuls-Portable-Adjustable-Emergency-Earthing/dp/B0DVPQW978?tag=evtime-21" target="_blank" rel="noopener noreferrer" className="inline-block w-full py-2 bg-primary text-primary-foreground font-semibold rounded-lg hover:opacity-90 transition-opacity">
                      View on Amazon
                    </a>
                 </div>
@@ -59,9 +59,9 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
                   <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1">
                      <span className="w-2 h-2 bg-muted-foreground rounded-full"></span> Sponsored
                   </div>
-                  <h3 className="font-bold text-lg leading-tight mb-1">Tata Neu HDFC Credit Card</h3>
-                  <p className="text-xs text-muted-foreground mb-2">Get up to 10% cashback on EV charging stations across India.</p>
-                  <a href="#" className="inline-block px-4 py-1.5 bg-primary text-primary-foreground text-sm font-semibold rounded-lg hover:opacity-90 transition-opacity">
+                  <h3 className="font-bold text-lg leading-tight mb-1">Qubo Dashcam Pro 3K</h3>
+                  <p className="text-xs text-muted-foreground mb-2">Dual Channel, G-Sensor, Emergency Recording. Protect your EV today.</p>
+                  <a href="https://www.amazon.in/Qubo-G-Sensor-Emergency-Recording-Supports/dp/B0G64T8HFX?tag=evtime-21" target="_blank" className="inline-block px-4 py-1.5 bg-primary text-primary-foreground text-sm font-semibold rounded-lg hover:opacity-90 transition-opacity">
                     Apply Now
                   </a>
                </div>
@@ -83,9 +83,9 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
                   <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1">
                      <span className="w-2 h-2 bg-muted-foreground rounded-full"></span> Sponsored
                   </div>
-                  <h3 className="font-bold text-lg leading-tight mb-1">Protect Your EV</h3>
-                  <p className="text-xs text-muted-foreground mb-2">Comprehensive insurance for battery and electronics. Get a quote today.</p>
-                  <a href="#" className="inline-block px-4 py-1.5 bg-primary text-primary-foreground text-sm font-semibold rounded-lg hover:opacity-90 transition-opacity">
+                  <h3 className="font-bold text-lg leading-tight mb-1">StromPuls 22kW EV Charger</h3>
+                  <p className="text-xs text-muted-foreground mb-2">32A, 3 Phase, 5m Cable, Touch Screen, Wi-Fi, BT, RFID & 5 Years Warranty.</p>
+                  <a href="https://www.amazon.in/StromPuls-Charger-Ajdustable-Blutooth-Certified/dp/B0DFMGB3KH?tag=evtime-21" target="_blank" className="inline-block px-4 py-1.5 bg-primary text-primary-foreground text-sm font-semibold rounded-lg hover:opacity-90 transition-opacity">
                     View Plans
                   </a>
                </div>
@@ -109,7 +109,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
                    </div>
                    <h3 className="font-bold text-lg leading-tight mb-2">Tata Neu HDFC Card</h3>
                    <p className="text-sm text-muted-foreground mb-4">Get up to 10% cashback on EV charging stations across India. Apply instantly.</p>
-                   <a href="#" className="inline-block w-full py-2 bg-primary text-primary-foreground font-semibold rounded-lg hover:opacity-90 transition-opacity">
+                   <a href="https://www.tataneu.com/v2/finance/creditcard/product-detail?referralCode=GOUR6250&utm_content=GOUR6250" target="_blank" className="inline-block w-full py-2 bg-primary text-primary-foreground font-semibold rounded-lg hover:opacity-90 transition-opacity">
                      Apply Now
                    </a>
                 </div>
