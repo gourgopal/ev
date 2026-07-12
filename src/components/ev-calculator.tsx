@@ -35,6 +35,85 @@ type ChargeHistoryItem = {
   rangeGained: number;
 };
 
+
+const AD_BANNERS = [
+  {
+    type: 'credit_card',
+    icon: < Zap className="w-5 h-5" />,
+    title: "10% Cashback on Charging",
+    desc: "Tata Neu HDFC Credit Card. Zero Joining Fee!",
+    url: "https://www.tataneu.com/v2/finance/creditcard/product-detail?referralCode=GOUR6250&utm_content=GOUR6250",
+    buttonText: "Apply Now"
+  },
+  {
+    type: 'tpms',
+    icon: < Activity className="w-5 h-5" />,
+    title: "Optimize Range with TPMS",
+    desc: "Skyshop C240 Solar TPMS (Real-time Pressure)",
+    url: "https://www.amazon.in/C240-External-Monitoring-Real-Time-Precision/dp/B09SLTNSYL?tag=evtime-21",
+    buttonText: "View on Amazon"
+  },
+  {
+    type: 'dashcam',
+    icon: < Clock3 className="w-5 h-5" />,
+    title: "Protect Your EV",
+    desc: "Qubo Dashcam Pro 3K (Dual Channel)",
+    url: "https://www.amazon.in/Qubo-G-Sensor-Emergency-Recording-Supports/dp/B0G64T8HFX?tag=evtime-21",
+    buttonText: "View on Amazon"
+  },
+  {
+    type: 'accessories',
+    icon: < ShoppingCart className="w-5 h-5" />,
+    title: "Shop EV Accessories",
+    desc: "Find seat covers, mats & more for your EV.",
+    url: "https://www.amazon.in/s?k=EV+Accessories&tag=evtime-21", // Replaced dynamically later
+    buttonText: "Shop Now"
+  }
+];
+
+function AffiliateCarousel({ selectedCar }: { selectedCar: EVCar | null }) {
+  const [adIndex, setAdIndex] = useState(0);
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setAdIndex((prev) => (prev + 1) % AD_BANNERS.length);
+    }, 8000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const ad = AD_BANNERS[adIndex];
+  let url = ad.url;
+  let desc = ad.desc;
+  if (ad.type === 'accessories') {
+    const brand = selectedCar ? selectedCar.brand + " " + selectedCar.model : "EV";
+    url = `https://www.amazon.in/s?k=${encodeURIComponent(brand + " accessories")}&tag=evtime-21`;
+    desc = `Find seat covers, mats & more for your ${brand}.`;
+  }
+
+  return (
+    <a 
+      href={url}
+      target="_blank" rel="noopener noreferrer"
+      className="mt-4 p-3 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-between hover:bg-orange-500/20 transition-colors font-sans group animate-in fade-in"
+      key={adIndex}
+    >
+      <div className="flex items-center gap-3 max-w-[70%]">
+        <div className="w-10 h-10 shrink-0 bg-orange-500/20 rounded-full flex items-center justify-center text-orange-400">
+          {ad.icon}
+        </div>
+        <div className="truncate">
+          <p className="text-[10px] text-orange-500/60 font-bold uppercase tracking-widest">Sponsored</p>
+          <p className="text-sm text-orange-300 font-semibold truncate group-hover:underline">{ad.title}</p>
+          <p className="text-xs text-orange-500/60 truncate">{desc}</p>
+        </div>
+      </div>
+      <div className="text-orange-400 bg-orange-500/20 px-3 py-1 rounded text-xs font-bold font-mono border border-orange-500/20 group-hover:bg-orange-500/30 whitespace-nowrap">
+        {ad.buttonText}
+      </div>
+    </a>
+  );
+}
+
 export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCar }) {
   const [capacity, setCapacity] = useState<number | string>(initialCar?.capacity || 40.5);
   const [customRange, setCustomRange] = useState<number | string>(initialCar?.range || 263);
@@ -298,14 +377,14 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="flex flex-col-reverse lg:grid lg:grid-cols-12 gap-8">
         
         {/* Left Column: Inputs */}
         <div className="lg:col-span-7 space-y-6">
           
           {/* Vehicle Details */}
           <div className="bg-[#0a0a0a] border border-green-500/30 p-6 rounded-3xl text-green-400 font-mono shadow-[0_0_20px_rgba(34,197,94,0.1)] relative z-40">
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2"><Zap className="text-green-500 w-5 h-5"/> VEHICLE CONFIGURATION</h2>
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2"><Zap className="text-green-500 w-5 h-5"/> VEHICLE CONFIGURATION</h3>
             
             <div className="space-y-4">
               <div className="relative z-40">
@@ -442,64 +521,36 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
                   />
                 </div>
               </div>
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-green-500/30 mt-4">
+                 <div>
+                    <label tabIndex={0} className="flex items-center gap-1 text-sm font-medium mb-1 w-max group relative cursor-help outline-none">
+                      Charger (kW) <Info className="w-3.5 h-3.5 text-green-500/60" />
+                      <span className="absolute bottom-full left-0 mb-2 w-48 p-2 bg-black/95 border border-green-500/50 backdrop-blur-sm text-green-400 text-[10px] rounded opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity pointer-events-none z-50">Power delivered by the charger (e.g. 7.2 for Home AC, 50 for Fast DC).</span>
+                    </label>
+                    <input
+                      type="number" step="0.1"
+                      value={chargerKw}
+                      onChange={(e) => setChargerKw(e.target.value)}
+                      className="w-full p-2.5 rounded-lg border border-green-500/30 bg-green-950/10 focus:ring-2 focus:ring-green-500 text-green-300 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label tabIndex={0} className="flex items-center gap-1 text-sm font-medium mb-1 w-max group relative cursor-help outline-none">
+                      Cost ({currency}/kWh) <Info className="w-3.5 h-3.5 text-green-500/60" />
+                      <span className="absolute bottom-full right-0 mb-2 w-48 p-2 bg-black/95 border border-green-500/50 backdrop-blur-sm text-green-400 text-[10px] rounded opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity pointer-events-none z-50">Your home electricity tariff or public charging rate.</span>
+                    </label>
+                    <input
+                      type="number" step="0.1"
+                      value={costPerKwh}
+                      onChange={(e) => setCostPerKwh(e.target.value)}
+                      className="w-full p-2.5 rounded-lg border border-green-500/30 bg-green-950/10 focus:ring-2 focus:ring-green-500 text-green-300 outline-none"
+                    />
+                  </div>
+              </div>
+
             </div>
           </div>
 
-          {/* Grid & Economics */}
-          <div className="bg-[#0a0a0a] border border-green-500/30 p-6 rounded-3xl text-green-400 font-mono shadow-[0_0_20px_rgba(34,197,94,0.1)]">
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2"><Activity className="text-green-500 w-5 h-5"/> GRID & ECONOMICS</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-               <div>
-                  <label className="flex items-center gap-1 text-sm font-medium mb-1 w-max group relative cursor-help">
-                    Charger Output (kW) <Info className="w-3.5 h-3.5 text-green-500/60" />
-                    <span className="absolute bottom-full left-0 mb-2 w-48 p-2 bg-black/90 backdrop-blur-sm text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">Power delivered by the charger (e.g. 7.2 for Home AC, 50 for Fast DC).</span>
-                  </label>
-                  <input
-                    type="number" step="0.1"
-                    value={chargerKw}
-                    onChange={(e) => setChargerKw(e.target.value)}
-                    className="w-full p-2.5 rounded-lg border border-green-500/30 bg-green-950/10 focus:ring-2 focus:ring-green-500 text-green-300 outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="flex items-center gap-1 text-sm font-medium mb-1 w-max group relative cursor-help">
-                    Electricity Cost ({currency}/kWh) <Info className="w-3.5 h-3.5 text-green-500/60" />
-                    <span className="absolute bottom-full left-0 mb-2 w-48 p-2 bg-black/90 backdrop-blur-sm text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">Your home electricity tariff or public charging rate.</span>
-                  </label>
-                  <input
-                    type="number" step="0.1"
-                    value={costPerKwh}
-                    onChange={(e) => setCostPerKwh(e.target.value)}
-                    className="w-full p-2.5 rounded-lg border border-green-500/30 bg-green-950/10 focus:ring-2 focus:ring-green-500 text-green-300 outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="flex items-center gap-1 text-sm font-medium mb-1 w-max group relative cursor-help">
-                    Petrol/ICE Cost ({currency}/L) <Info className="w-3.5 h-3.5 text-green-500/60" />
-                    <span className="absolute bottom-full left-0 mb-2 w-48 p-2 bg-black/90 backdrop-blur-sm text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">Current price of petrol or diesel in your area.</span>
-                  </label>
-                  <input
-                    type="number" step="1"
-                    value={petrolPrice}
-                    onChange={(e) => setPetrolPrice(e.target.value)}
-                    className="w-full p-2.5 rounded-lg border border-green-500/30 bg-green-950/10 focus:ring-2 focus:ring-green-500 text-green-300 outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="flex items-center gap-1 text-sm font-medium mb-1 w-max group relative cursor-help">
-                    ICE Efficiency ({rangeUnit}/L) <Info className="w-3.5 h-3.5 text-green-500/60" />
-                    <span className="absolute bottom-full left-0 mb-2 w-48 p-2 bg-black/90 backdrop-blur-sm text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">Average mileage of a comparable internal combustion engine car.</span>
-                  </label>
-                  <input
-                    type="number" step="1"
-                    value={iceEfficiency}
-                    onChange={(e) => setIceEfficiency(e.target.value)}
-                    className="w-full p-2.5 rounded-lg border border-green-500/30 bg-green-950/10 focus:ring-2 focus:ring-green-500 text-green-300 outline-none"
-                  />
-                </div>
-            </div>
-          </div>
-          
           {/* Advanced Options Toggle */}
           <button
             onClick={() => setShowAdvanced(!showAdvanced)}
@@ -545,6 +596,37 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
                         </div>
                       </label>
                     </div>
+                  </div>
+
+                  
+                  <div className="pt-4 border-t border-green-500/30">
+                     <h4 className="text-sm font-bold text-green-500 mb-4">Internal Combustion Engine (ICE) Comparison</h4>
+                     <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label tabIndex={0} className="flex items-center gap-1 text-xs font-medium mb-1 w-max group relative cursor-help outline-none">
+                            Petrol Cost ({currency}/L) <Info className="w-3.5 h-3.5 text-green-500/60" />
+                            <span className="absolute bottom-full left-0 mb-2 w-48 p-2 bg-black/95 border border-green-500/50 backdrop-blur-sm text-green-400 text-[10px] rounded opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity pointer-events-none z-50">Current price of petrol or diesel in your area.</span>
+                          </label>
+                          <input
+                            type="number" step="1"
+                            value={petrolPrice}
+                            onChange={(e) => setPetrolPrice(e.target.value)}
+                            className="w-full p-2.5 rounded-lg border border-green-500/30 bg-green-950/10 focus:ring-2 focus:ring-green-500 text-green-300 outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label tabIndex={0} className="flex items-center gap-1 text-xs font-medium mb-1 w-max group relative cursor-help outline-none">
+                            ICE Mileage ({rangeUnit}/L) <Info className="w-3.5 h-3.5 text-green-500/60" />
+                            <span className="absolute bottom-full right-0 mb-2 w-48 p-2 bg-black/95 border border-green-500/50 backdrop-blur-sm text-green-400 text-[10px] rounded opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity pointer-events-none z-50">Average mileage of a comparable internal combustion engine car.</span>
+                          </label>
+                          <input
+                            type="number" step="1"
+                            value={iceEfficiency}
+                            onChange={(e) => setIceEfficiency(e.target.value)}
+                            className="w-full p-2.5 rounded-lg border border-green-500/30 bg-green-950/10 focus:ring-2 focus:ring-green-500 text-green-300 outline-none"
+                          />
+                        </div>
+                     </div>
                   </div>
 
                   <div className="pt-4 border-t border-green-500/30">
@@ -600,7 +682,7 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
 
         {/* Right Column: Results Dashboard (Unified LED Screen) */}
         <div className="lg:col-span-5">
-          <div className="rounded-3xl p-6 lg:p-8 sticky top-24 flex flex-col h-full min-h-[650px] space-y-6 bg-[#0a0a0a] text-green-400 border border-green-500/30 relative overflow-hidden ring-1 ring-green-500/20 shadow-[0_0_40px_rgba(34,197,94,0.15)] font-mono">
+          <div className="rounded-3xl p-6 lg:p-8 lg:sticky lg:top-24 flex flex-col h-[550px] lg:h-full lg:min-h-[650px] space-y-4 lg:space-y-6 bg-[#0a0a0a] text-green-400 border border-green-500/30 relative overflow-hidden ring-1 ring-green-500/20 shadow-[0_0_40px_rgba(34,197,94,0.15)] font-mono">
             
             {/* LCD Screen Lines Effect */}
             <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(255,255,255,0)_50%,rgba(0,0,0,1)_50%)] bg-[length:100%_4px] z-20"></div>
@@ -617,13 +699,23 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
               </div>
               
               {/* Main LCD Display */}
-              <div className="relative w-full py-8 flex items-center justify-center group cursor-crosshair">
+              <div className="relative w-full py-4 lg:py-8 flex items-center justify-center group cursor-crosshair">
                  {/* Circular Glow */}
                  <div className={`absolute w-64 h-64 rounded-full blur-3xl opacity-30 ${isSimulating ? 'bg-amber-500/20 animate-pulse' : 'bg-green-500/10'}`}></div>
                  
                  {/* The SoC Text */}
                  <div className={`text-[120px] font-black text-transparent bg-clip-text leading-none drop-shadow-[0_0_15px_rgba(74,222,128,0.5)] ${isSimulating ? 'bg-gradient-to-b from-amber-300 to-amber-600' : 'bg-gradient-to-b from-green-300 to-green-600'}`}>
-                    {isSimulating ? Number(simSoc).toFixed(2) : Number(startSoc).toFixed(2)}<span className="text-6xl">%</span>
+                    {isSimulating ? (
+                      <>
+                        {Math.floor(simSoc)}
+                        <span className="text-5xl">{(simSoc % 1).toFixed(2).substring(1)}%</span>
+                      </>
+                    ) : (
+                      <>
+                        {Math.floor(Number(startSoc))}
+                        <span className="text-5xl">{(Number(startSoc) % 1).toFixed(2).substring(1)}%</span>
+                      </>
+                    )}
                  </div>
               </div>
               
@@ -642,11 +734,11 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
               {/* Math Breakdown / Estimates */}
               {result ? (
                 <div className="space-y-4 mb-6 flex-grow flex flex-col">
-                   <div className="group relative">
+                   <div className="group relative" tabIndex={0}>
                      <button className="flex items-center gap-2 text-xs text-green-500/60 hover:text-green-400 transition-colors uppercase tracking-widest font-bold font-mono">
                        <Info className="w-3.5 h-3.5" /> View Session Metrics (1%)
                      </button>
-                     <div className="absolute top-full mt-2 left-0 w-full bg-black/95 backdrop-blur-xl border border-green-500/50 rounded-xl p-4 text-xs leading-relaxed font-sans opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-[0_0_20px_rgba(34,197,94,0.2)]">
+                     <div className="absolute top-full mt-2 left-0 w-full bg-black/95 backdrop-blur-xl border border-green-500/50 rounded-xl p-4 text-xs leading-relaxed font-sans opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity pointer-events-none z-50 shadow-[0_0_20px_rgba(34,197,94,0.2)]">
                        <p className="text-green-500 mb-2 uppercase tracking-widest font-bold text-[10px] font-mono">1% Charge Equivalents</p>
                        <div className="grid grid-cols-1 gap-2">
                          <div className="flex justify-between border-b border-green-500/20 pb-1"><span>Energy Required</span><strong className="text-green-300">{((Number(capacity) / (Number(efficiency)/100)) / 100).toFixed(2)} kWh</strong></div>
@@ -692,30 +784,13 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
               )}
 
               {/* Affiliate Ad Banner */}
-              <a 
-                href={`https://www.amazon.in/s?k=${encodeURIComponent(selectedCar ? selectedCar.brand + " " + selectedCar.model + " accessories" : "EV accessories")}&tag=evtime-21`}
-                target="_blank" rel="noopener noreferrer"
-                className="mt-4 p-3 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-between hover:bg-orange-500/20 transition-colors font-sans group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center text-orange-400">
-                    <ShoppingCart className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-orange-500/60 font-bold uppercase tracking-widest">Sponsored</p>
-                    <p className="text-sm text-orange-300 font-semibold group-hover:underline">Shop {selectedCar ? selectedCar.brand + " " + selectedCar.model : "EV"} Accessories on Amazon</p>
-                  </div>
-                </div>
-                <div className="text-orange-400 bg-orange-500/20 px-3 py-1 rounded text-xs font-bold font-mono border border-orange-500/20 group-hover:bg-orange-500/30">
-                  Shop Now
-                </div>
-              </a>
+              <AffiliateCarousel selectedCar={selectedCar} />
 
               {/* Controls */}
               <div className="mt-auto pt-4 border-t border-green-500/20">
                 {!isSimulating && (
                   <div className="flex justify-between items-center px-1 mb-3">
-                     <label className="text-xs text-green-500/60 uppercase flex items-center gap-1 group relative cursor-help">⚡ Boost Charge <Info className="w-3 h-3"/><span className="absolute bottom-full left-0 mb-1 w-48 p-2 bg-black/90 backdrop-blur-sm text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 normal-case tracking-normal">Artificially accelerates time to simulate a full session quickly. Does not affect real-world physics.</span></label>
+                     <label className="text-xs text-green-500/60 uppercase flex items-center gap-1 group relative cursor-help outline-none" tabIndex={0}>⚡ Boost Charge <Info className="w-3 h-3"/><span className="absolute bottom-full left-0 mb-1 w-48 p-2 bg-black/90 backdrop-blur-sm text-white text-[10px] rounded opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity pointer-events-none z-50 normal-case tracking-normal">Artificially accelerates time to simulate a full session quickly. Does not affect real-world physics.</span></label>
                      <select 
                        value={simSpeed}
                        onChange={(e) => setSimSpeed(Number(e.target.value))}
