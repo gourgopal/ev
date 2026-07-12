@@ -8,6 +8,8 @@ import {
   Info,
   Search,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Activity,
   PlayCircle,
   StopCircle,
