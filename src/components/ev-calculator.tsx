@@ -48,7 +48,7 @@ export default function EVChargingCalculator({
     initialCar?.range || 263,
   );
   const [startSoc, setStartSoc] = useState<number | string>(20);
-  const [endSoc, setEndSoc] = useState<number | string>(100);
+  const [endSoc, setEndSoc] = useState<number | string>(85);
   const [chargerKw, setChargerKw] = useState<number | string>(30);
   const [efficiency, setEfficiency] = useState<number | string>(90);
   const [curveType, setCurveType] = useState<
@@ -100,6 +100,13 @@ export default function EVChargingCalculator({
   const [showHistory, setShowHistory] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [tickerIndex, setTickerIndex] = useState(0);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTickerIndex(prev => (prev + 1) % 3);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const shareRef = useRef<HTMLDivElement>(null);
@@ -336,13 +343,13 @@ export default function EVChargingCalculator({
         {/* Left Column: Inputs */}
         <div className="lg:col-span-7 space-y-6">
           {/* Vehicle Details */}
-          <div className="bg-[#0a0a0a] border border-green-500/30 p-6 rounded-3xl text-green-400 font-mono shadow-[0_0_20px_rgba(34,197,94,0.1)] relative z-40">
+          <div className="bg-[#0a0a0a] border border-green-500/30 p-6 rounded-3xl text-green-400 font-mono shadow-[0_0_20px_rgba(34,197,94,0.1)] relative z-10">
             <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
               <Zap className="text-green-500 w-5 h-5" /> VEHICLE CONFIGURATION
             </h3>
 
             <div className="space-y-4">
-              <div className="relative z-40">
+              <div className="relative z-10">
                 <label className="block text-sm text-green-500/60 mb-1">
                   Select Vehicle Model
                 </label>
@@ -823,66 +830,62 @@ export default function EVChargingCalculator({
 
               {/* Math Breakdown / Estimates */}
               {result ? (
-                <div className="space-y-4 mb-6 flex-grow flex flex-col items-center justify-center py-8">
-                  {/* Primary Focus: TIME NEEDED */}
-                  <div className="text-center mb-6">
-                    <p className="text-sm text-green-500/80 uppercase tracking-widest font-bold mb-2">
-                      {isSimulating ? "Time Elapsed" : "Time Needed"}
-                    </p>
-                    {isSimulating ? (
-                      (() => {
-                        const elapsedMins =
-                          ((((simSoc - Number(startSoc)) / 100) *
-                            Number(capacity)) /
-                            (Number(efficiency) / 100) /
-                            (Number(chargerKw) * (Number(efficiency) / 100))) *
-                          60;
-                        const hrs = Math.floor(elapsedMins / 60);
-                        const mins = Math.floor(elapsedMins % 60);
-                        const secs = Math.floor((elapsedMins * 60) % 60);
-                        return (
-                          <div className="text-6xl md:text-8xl font-black font-mono text-green-400 drop-shadow-[0_0_15px_rgba(74,222,128,0.5)]">
-                            {hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m ${secs}s`}
-                          </div>
-                        );
-                      })()
-                    ) : (
-                      <div className="text-6xl md:text-8xl font-black font-mono text-green-400 drop-shadow-[0_0_15px_rgba(74,222,128,0.5)]">
-                        {result.hrs > 0
-                          ? `${result.hrs}h ${result.mins}m`
-                          : `${result.mins}m`}
-                      </div>
-                    )}
-                  </div>
+                <div className="space-y-4 mb-6 flex-grow flex flex-col items-center justify-center py-4 md:py-8">
+                   
+                   {/* Row 1: 20% -> 85% */}
+                   <div className="text-xl md:text-2xl font-bold font-mono text-green-500 mb-2">
+                      {startSoc}% &rarr; {endSoc}%
+                   </div>
 
-                  {/* Secondary Focus: COST */}
-                  <div className="bg-green-950/20 px-8 py-4 rounded-2xl border border-green-500/30 text-center mb-6">
-                    <p className="text-[10px] text-green-500/60 uppercase mb-1">
-                      Total Estimated Cost
-                    </p>
-                    <p className="text-3xl text-amber-400 font-bold">
-                      {currency}
-                      {isSimulating
-                        ? (
-                            ((((simSoc - Number(startSoc)) / 100) *
-                              Number(capacity)) /
-                              (Number(efficiency) / 100)) *
-                            Number(costPerKwh)
-                          ).toFixed(2)
-                        : result.totalCost.toFixed(2)}
-                    </p>
-                    <p className="text-xs text-amber-500/60 mt-1">
-                      ~ {currency}
-                      {result.costPerUnit.toFixed(2)} per {rangeUnit}
-                    </p>
-                  </div>
+                   {/* Row 2: in 1h 30 mins | 30kw */}
+                   <div className="text-4xl md:text-6xl font-black font-mono text-green-400 drop-shadow-[0_0_15px_rgba(74,222,128,0.5)] mb-4 text-center leading-tight">
+                     {isSimulating ? (() => {
+                          const elapsedMins = ((((simSoc - Number(startSoc)) / 100) * Number(capacity) / (Number(efficiency)/100)) / (Number(chargerKw) * (Number(efficiency)/100))) * 60;
+                          const hrs = Math.floor(elapsedMins / 60);
+                          const mins = Math.floor(elapsedMins % 60);
+                          const secs = Math.floor((elapsedMins * 60) % 60);
+                          return <span>in {hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m ${secs}s`}</span>;
+                     })() : (
+                       <span>in {result.hrs > 0 ? `${result.hrs}h ${result.mins}m` : `${result.mins}m`}</span>
+                     )} <br className="md:hidden" /><span className="hidden md:inline text-green-500/40"> | </span><span className="text-2xl md:text-4xl text-green-300">{chargerKw}kW</span>
+                   </div>
 
-                  <button
-                    onClick={() => setShowDetailsModal(true)}
-                    className="flex items-center gap-2 text-sm text-green-300 bg-green-500/10 px-6 py-3 rounded-full border border-green-500/30 hover:bg-green-500/20 transition-colors uppercase tracking-widest font-bold"
-                  >
-                    <Info className="w-4 h-4" /> See More Details
-                  </button>
+                   {/* Row 3: Estimated Cost + Details Button */}
+                   <div className="flex flex-col md:flex-row items-center gap-4 mb-6">
+                     <div className="bg-green-950/40 px-6 py-2 rounded-xl border border-green-500/30 text-center flex-1 w-full md:w-auto">
+                       <p className="text-[10px] text-green-500/60 uppercase mb-0.5 tracking-wider">Est. Cost</p>
+                       <p className="text-xl text-amber-400 font-bold">{currency}{isSimulating ? (((simSoc - Number(startSoc)) / 100) * Number(capacity) / (Number(efficiency)/100) * Number(costPerKwh)).toFixed(2) : result.totalCost.toFixed(2)}</p>
+                     </div>
+                     <button 
+                       onClick={() => setShowDetailsModal(true)}
+                       className="flex-1 w-full md:w-auto flex items-center justify-center gap-2 text-xs md:text-sm text-green-300 bg-green-500/10 px-6 py-3 md:py-4 rounded-xl border border-green-500/30 hover:bg-green-500/20 transition-colors uppercase tracking-widest font-bold h-full whitespace-nowrap"
+                     >
+                       <Info className="w-4 h-4" /> See Details
+                     </button>
+                   </div>
+
+                   {/* Auto-sliding Ticker */}
+                   <div className="w-full max-w-sm h-12 bg-black border border-green-500/20 rounded-lg overflow-hidden relative flex items-center justify-center shadow-[inset_0_0_10px_rgba(34,197,94,0.1)]">
+                      <div className="absolute top-0 bottom-0 left-0 w-8 bg-gradient-to-r from-black to-transparent z-10"></div>
+                      <div className="absolute top-0 bottom-0 right-0 w-8 bg-gradient-to-l from-black to-transparent z-10"></div>
+                      
+                      {tickerIndex === 0 && (
+                        <div className="animate-in slide-in-from-bottom-4 fade-in duration-500 text-sm font-mono text-green-400 flex items-center gap-2">
+                          <Activity className="w-4 h-4 text-green-500/60" /> Range Gained: +{Math.round(result.rangeGained)} {rangeUnit}
+                        </div>
+                      )}
+                      {tickerIndex === 1 && (
+                        <div className="animate-in slide-in-from-bottom-4 fade-in duration-500 text-sm font-mono text-green-400 flex items-center gap-2">
+                          <Activity className="w-4 h-4 text-green-500/60" /> Savings vs ICE: {currency}{result.savings.toFixed(2)}
+                        </div>
+                      )}
+                      {tickerIndex === 2 && (
+                        <div className="animate-in slide-in-from-bottom-4 fade-in duration-500 text-sm font-mono text-green-400 flex items-center gap-2">
+                          <Activity className="w-4 h-4 text-green-500/60" /> Cost: ~{currency}{result.costPerUnit.toFixed(2)}/{rangeUnit}
+                        </div>
+                      )}
+                   </div>
+                   
                 </div>
               ) : (
                 <div className="flex-grow flex items-center justify-center text-red-400 border border-red-500/20 rounded-xl bg-red-950/20 p-4 text-sm text-center font-sans">
@@ -896,82 +899,33 @@ export default function EVChargingCalculator({
                   <div className="bg-[#0a0a0a] border border-green-500/30 rounded-3xl w-full max-w-lg shadow-[0_0_50px_rgba(34,197,94,0.1)] overflow-hidden flex flex-col relative text-green-400 max-h-[90vh]">
                     <div className="p-4 border-b border-green-500/30 flex justify-between items-center bg-green-950/20">
                       <h3 className="font-bold flex items-center gap-2 text-green-300">
-                        <Activity className="w-5 h-5" /> Session Details
+                        <Activity className="w-5 h-5"/> Session Details
                       </h3>
-                      <button
-                        onClick={() => setShowDetailsModal(false)}
-                        className="p-2 hover:bg-green-500/20 rounded-full transition-colors"
-                      >
+                      <button onClick={() => setShowDetailsModal(false)} className="p-2 hover:bg-green-500/20 rounded-full transition-colors">
                         <X className="w-5 h-5 text-green-500" />
                       </button>
                     </div>
-
+                    
                     <div className="p-6 overflow-y-auto space-y-6 custom-scrollbar">
-                      <div>
-                        <p className="text-green-500 mb-3 uppercase tracking-widest font-bold text-xs">
-                          1% Charge Equivalents
-                        </p>
-                        <div className="bg-green-950/20 rounded-xl border border-green-500/20 p-4 space-y-2 text-sm">
-                          <div className="flex justify-between border-b border-green-500/20 pb-2">
-                            <span>Energy Required</span>
-                            <strong className="text-green-300">
-                              {(
-                                Number(capacity) /
-                                (Number(efficiency) / 100) /
-                                100
-                              ).toFixed(2)}{" "}
-                              kWh
-                            </strong>
-                          </div>
-                          <div className="flex justify-between border-b border-green-500/20 pb-2">
-                            <span>Estimated Cost</span>
-                            <strong className="text-amber-400">
-                              {currency}
-                              {(
-                                (Number(capacity) /
-                                  (Number(efficiency) / 100) /
-                                  100) *
-                                Number(costPerKwh)
-                              ).toFixed(2)}
-                            </strong>
-                          </div>
-                          <div className="flex justify-between">
-                            <span>Range Gained</span>
-                            <strong className="text-green-300">
-                              +{Math.round(Number(customRange) / 100)}{" "}
-                              {rangeUnit}
-                            </strong>
-                          </div>
-                        </div>
-                      </div>
+                       
+                       <div>
+                         <p className="text-green-500 mb-3 uppercase tracking-widest font-bold text-xs">1% Charge Equivalents</p>
+                         <div className="bg-green-950/20 rounded-xl border border-green-500/20 p-4 space-y-2 text-sm">
+                           <div className="flex justify-between border-b border-green-500/20 pb-2"><span>Energy Required</span><strong className="text-green-300">{((Number(capacity) / (Number(efficiency)/100)) / 100).toFixed(2)} kWh</strong></div>
+                           <div className="flex justify-between border-b border-green-500/20 pb-2"><span>Estimated Cost</span><strong className="text-amber-400">{currency}{(((Number(capacity) / (Number(efficiency)/100)) / 100) * Number(costPerKwh)).toFixed(2)}</strong></div>
+                           <div className="flex justify-between"><span>Range Gained</span><strong className="text-green-300">+{Math.round(Number(customRange) / 100)} {rangeUnit}</strong></div>
+                         </div>
+                       </div>
 
-                      <div>
-                        <p className="text-green-500 mb-3 uppercase tracking-widest font-bold text-xs">
-                          Session Totals
-                        </p>
-                        <div className="bg-green-950/20 rounded-xl border border-green-500/20 p-4 space-y-2 text-sm">
-                          <div className="flex justify-between border-b border-green-500/20 pb-2">
-                            <span>Range Gained</span>
-                            <strong className="text-green-300">
-                              +{Math.round(result.rangeGained)} {rangeUnit}
-                            </strong>
-                          </div>
-                          <div className="flex justify-between border-b border-green-500/20 pb-2">
-                            <span>ICE Cost Equivalent</span>
-                            <strong className="text-red-400">
-                              {currency}
-                              {result.iceCost.toFixed(2)}
-                            </strong>
-                          </div>
-                          <div className="flex justify-between">
-                            <span>Total Savings</span>
-                            <strong className="text-green-400">
-                              {currency}
-                              {result.savings.toFixed(2)}
-                            </strong>
-                          </div>
-                        </div>
-                      </div>
+                       <div>
+                         <p className="text-green-500 mb-3 uppercase tracking-widest font-bold text-xs">Session Totals</p>
+                         <div className="bg-green-950/20 rounded-xl border border-green-500/20 p-4 space-y-2 text-sm">
+                           <div className="flex justify-between border-b border-green-500/20 pb-2"><span>Range Gained</span><strong className="text-green-300">+{Math.round(result.rangeGained)} {rangeUnit}</strong></div>
+                           <div className="flex justify-between border-b border-green-500/20 pb-2"><span>ICE Cost Equivalent</span><strong className="text-red-400">{currency}{result.iceCost.toFixed(2)}</strong></div>
+                           <div className="flex justify-between"><span>Total Savings</span><strong className="text-green-400">{currency}{result.savings.toFixed(2)}</strong></div>
+                         </div>
+                       </div>
+                       
                     </div>
                   </div>
                 </div>
@@ -1026,7 +980,7 @@ export default function EVChargingCalculator({
                     disabled={!result}
                     className="w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all bg-green-500 text-[#0a0a0a] hover:bg-green-400 shadow-[0_0_20px_rgba(34,197,94,0.3)] disabled:opacity-50 font-sans"
                   >
-                    <PlayCircle className="w-6 h-6" /> INITIATE CHARGE
+                    <PlayCircle className="w-6 h-6" /> Simulate Charging
                   </button>
                 )}
               </div>
