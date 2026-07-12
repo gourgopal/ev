@@ -343,13 +343,13 @@ export default function EVChargingCalculator({
         {/* Left Column: Inputs */}
         <div className="lg:col-span-7 space-y-6">
           {/* Vehicle Details */}
-          <div className="bg-[#0a0a0a] border border-green-500/30 p-6 rounded-3xl text-green-400 font-mono shadow-[0_0_20px_rgba(34,197,94,0.1)] relative z-10">
+          <div className="bg-[#0a0a0a] border border-green-500/30 p-6 rounded-3xl text-green-400 font-mono shadow-[0_0_20px_rgba(34,197,94,0.1)] relative">
             <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
               <Zap className="text-green-500 w-5 h-5" /> VEHICLE CONFIGURATION
             </h3>
 
             <div className="space-y-4">
-              <div className="relative z-10">
+              <div className="relative">
                 <label className="block text-sm text-green-500/60 mb-1">
                   Select Vehicle Model
                 </label>
@@ -369,7 +369,7 @@ export default function EVChargingCalculator({
                   </button>
 
                   {isDropdownOpen && (
-                    <div className="absolute z-10 top-full left-0 right-0 mt-2 bg-[#0a0a0a]/95 backdrop-blur-2xl border border-green-500/50 shadow-[0_0_30px_rgba(34,197,94,0.2)] rounded-xl shadow-2xl overflow-hidden max-h-72 flex flex-col ring-1 ring-green-500/30">
+                    <div className="absolute z-50 top-full left-0 right-0 mt-2 bg-[#0a0a0a]/95 backdrop-blur-2xl border border-green-500/50 shadow-[0_0_30px_rgba(34,197,94,0.2)] rounded-xl shadow-2xl overflow-hidden max-h-72 flex flex-col ring-1 ring-green-500/30">
                       <div className="p-2 border-b border-green-500/30 bg-[#0a0a0a]">
                         <div className="relative">
                           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-green-500/60" />
@@ -783,62 +783,21 @@ export default function EVChargingCalculator({
                 )}
               </div>
 
-              {/* Main LCD Display */}
-              <div className="relative w-full py-4 lg:py-8 flex items-center justify-center group cursor-crosshair">
-                {/* Circular Glow */}
-                <div
-                  className={`absolute w-64 h-64 rounded-full blur-3xl opacity-30 ${isSimulating ? "bg-amber-500/20 animate-pulse" : "bg-green-500/10"}`}
-                ></div>
+              {/* Main LCD Display & Unified Results */}
+              <div className="flex-grow flex flex-col items-center justify-center py-4 space-y-4 md:space-y-6">
+                 
+                 {/* 1. Animated SoC */}
+                 <div className={`text-[80px] md:text-[120px] font-black text-transparent bg-clip-text leading-none drop-shadow-[0_0_15px_rgba(74,222,128,0.5)] ${isSimulating ? "bg-gradient-to-b from-amber-300 to-amber-600" : "bg-gradient-to-b from-green-300 to-green-600"}`}>
+                   {isSimulating ? (
+                     <>{Math.floor(simSoc)}<span className="text-4xl md:text-5xl">{(simSoc % 1).toFixed(2).substring(1)}%</span></>
+                   ) : (
+                     <>{Math.floor(Number(startSoc))}<span className="text-4xl md:text-5xl">{(Number(startSoc) % 1).toFixed(2).substring(1)}%</span></>
+                   )}
+                 </div>
 
-                {/* The SoC Text */}
-                <div
-                  className={`text-[120px] font-black text-transparent bg-clip-text leading-none drop-shadow-[0_0_15px_rgba(74,222,128,0.5)] ${isSimulating ? "bg-gradient-to-b from-amber-300 to-amber-600" : "bg-gradient-to-b from-green-300 to-green-600"}`}
-                >
-                  {isSimulating ? (
-                    <>
-                      {Math.floor(simSoc)}
-                      <span className="text-5xl">
-                        {(simSoc % 1).toFixed(2).substring(1)}%
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      {Math.floor(Number(startSoc))}
-                      <span className="text-5xl">
-                        {(Number(startSoc) % 1).toFixed(2).substring(1)}%
-                      </span>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              {/* Target & Speed */}
-              <div className="grid grid-cols-2 gap-4 text-center border-b border-green-500/20 pb-4 mb-4">
-                <div>
-                  <p className="text-[10px] text-green-500/60 uppercase">
-                    Target SoC
-                  </p>
-                  <p className="text-2xl font-bold">{endSoc}%</p>
-                </div>
-                <div>
-                  <p className="text-[10px] text-green-500/60 uppercase">
-                    Output Power
-                  </p>
-                  <p className="text-2xl font-bold">{chargerKw} kW</p>
-                </div>
-              </div>
-
-              {/* Math Breakdown / Estimates */}
-              {result ? (
-                <div className="space-y-4 mb-6 flex-grow flex flex-col items-center justify-center py-4 md:py-8">
-                   
-                   {/* Row 1: 20% -> 85% */}
-                   <div className="text-xl md:text-2xl font-bold font-mono text-green-500 mb-2">
-                      {startSoc}% &rarr; {endSoc}%
-                   </div>
-
-                   {/* Row 2: in 1h 30 mins | 30kw */}
-                   <div className="text-4xl md:text-6xl font-black font-mono text-green-400 drop-shadow-[0_0_15px_rgba(74,222,128,0.5)] mb-4 text-center leading-tight">
+                 {/* 2. The Time */}
+                 {result ? (
+                   <div className="text-4xl md:text-5xl font-black font-mono text-green-400 drop-shadow-[0_0_15px_rgba(74,222,128,0.5)] text-center leading-tight">
                      {isSimulating ? (() => {
                           const elapsedMins = ((((simSoc - Number(startSoc)) / 100) * Number(capacity) / (Number(efficiency)/100)) / (Number(chargerKw) * (Number(efficiency)/100))) * 60;
                           const hrs = Math.floor(elapsedMins / 60);
@@ -847,51 +806,44 @@ export default function EVChargingCalculator({
                           return <span>in {hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m ${secs}s`}</span>;
                      })() : (
                        <span>in {result.hrs > 0 ? `${result.hrs}h ${result.mins}m` : `${result.mins}m`}</span>
-                     )} <br className="md:hidden" /><span className="hidden md:inline text-green-500/40"> | </span><span className="text-2xl md:text-4xl text-green-300">{chargerKw}kW</span>
+                     )}
                    </div>
-
-                   {/* Row 3: Estimated Cost + Details Button */}
-                   <div className="flex flex-col md:flex-row items-center gap-4 mb-6">
-                     <div className="bg-green-950/40 px-6 py-2 rounded-xl border border-green-500/30 text-center flex-1 w-full md:w-auto">
-                       <p className="text-[10px] text-green-500/60 uppercase mb-0.5 tracking-wider">Est. Cost</p>
-                       <p className="text-xl text-amber-400 font-bold">{currency}{isSimulating ? (((simSoc - Number(startSoc)) / 100) * Number(capacity) / (Number(efficiency)/100) * Number(costPerKwh)).toFixed(2) : result.totalCost.toFixed(2)}</p>
-                     </div>
-                     <button 
-                       onClick={() => setShowDetailsModal(true)}
-                       className="flex-1 w-full md:w-auto flex items-center justify-center gap-2 text-xs md:text-sm text-green-300 bg-green-500/10 px-6 py-3 md:py-4 rounded-xl border border-green-500/30 hover:bg-green-500/20 transition-colors uppercase tracking-widest font-bold h-full whitespace-nowrap"
-                     >
-                       <Info className="w-4 h-4" /> See Details
-                     </button>
-                   </div>
-
-                   {/* Auto-sliding Ticker */}
+                 ) : (
+                   <div className="text-red-400 text-sm border border-red-500/20 bg-red-950/20 px-4 py-2 rounded-lg">Start SoC must be less than Target SoC</div>
+                 )}
+                 
+                 {/* 3. Sliding Information Ticker */}
+                 {result && (
                    <div className="w-full max-w-sm h-12 bg-black border border-green-500/20 rounded-lg overflow-hidden relative flex items-center justify-center shadow-[inset_0_0_10px_rgba(34,197,94,0.1)]">
                       <div className="absolute top-0 bottom-0 left-0 w-8 bg-gradient-to-r from-black to-transparent z-10"></div>
                       <div className="absolute top-0 bottom-0 right-0 w-8 bg-gradient-to-l from-black to-transparent z-10"></div>
                       
                       {tickerIndex === 0 && (
                         <div className="animate-in slide-in-from-bottom-4 fade-in duration-500 text-sm font-mono text-green-400 flex items-center gap-2">
-                          <Activity className="w-4 h-4 text-green-500/60" /> Range Gained: +{Math.round(result.rangeGained)} {rangeUnit}
+                          <Activity className="w-4 h-4 text-green-500/60" /> Target: {endSoc}% | Power: {chargerKw}kW
                         </div>
                       )}
                       {tickerIndex === 1 && (
                         <div className="animate-in slide-in-from-bottom-4 fade-in duration-500 text-sm font-mono text-green-400 flex items-center gap-2">
-                          <Activity className="w-4 h-4 text-green-500/60" /> Savings vs ICE: {currency}{result.savings.toFixed(2)}
+                          <Activity className="w-4 h-4 text-green-500/60" /> Range Gained: +{Math.round(result.rangeGained)} {rangeUnit}
                         </div>
                       )}
                       {tickerIndex === 2 && (
                         <div className="animate-in slide-in-from-bottom-4 fade-in duration-500 text-sm font-mono text-green-400 flex items-center gap-2">
-                          <Activity className="w-4 h-4 text-green-500/60" /> Cost: ~{currency}{result.costPerUnit.toFixed(2)}/{rangeUnit}
+                          <Activity className="w-4 h-4 text-green-500/60" /> Est Cost: {currency}{result.totalCost.toFixed(2)}
                         </div>
                       )}
                    </div>
-                   
-                </div>
-              ) : (
-                <div className="flex-grow flex items-center justify-center text-red-400 border border-red-500/20 rounded-xl bg-red-950/20 p-4 text-sm text-center font-sans">
-                  ERROR: Start SoC must be less than End SoC to initiate charge.
-                </div>
-              )}
+                 )}
+
+                 {/* 4. See Details Button */}
+                 {result && (
+                   <button onClick={() => setShowDetailsModal(true)} className="mt-2 w-full max-w-sm flex items-center justify-center gap-2 text-xs text-green-300 bg-green-500/10 px-4 py-3 rounded-xl border border-green-500/30 hover:bg-green-500/20 transition-colors uppercase tracking-widest font-bold h-full">
+                     <Info className="w-4 h-4" /> View Full Session Details
+                   </button>
+                 )}
+                 
+              </div>
 
               {/* Details Modal */}
               {showDetailsModal && result && (
