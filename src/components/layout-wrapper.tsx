@@ -35,13 +35,13 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
                    <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 flex justify-center gap-1 items-center">
                       <span className="w-2 h-2 bg-muted-foreground rounded-full"></span> Sponsored
                    </div>
-                   <h3 className="font-bold text-lg leading-tight mb-2">Upgrade to Level 2 Charging</h3>
-                   <p className="text-sm text-muted-foreground mb-4">Charge up to 7x faster at home with Lectron's premium smart chargers.</p>
-                   <a href="#" className="inline-block w-full py-2 bg-primary text-primary-foreground font-semibold rounded-lg hover:opacity-90 transition-opacity">
-                     Shop Lectron
+                   <h3 className="font-bold text-lg leading-tight mb-2">MRF Wanderer EV Tyres</h3>
+                   <p className="text-sm text-muted-foreground mb-4">Upgrade your Nexon EV with premium tubeless tyres designed for efficiency.</p>
+                   <a href="https://www.amazon.in/MRF-Wanderer-Street-Tubeless-Tyre/dp/B07GNTDNDJ?crid=15GBUH2IAI6QK&dib=eyJ2IjoiMSJ9.ByaoQS0-NgKxmtwOYA3qsfOwxjpqW3hk-hwPXKQGMT6thH7oq8PgsWpEsKDYchj3eW4MMJiTi8CIPJlxw3DG3964KZbS5OT2_oLTMTlQ2te5f8gW1S5Yx8sjt-dgcgp8hAW4k-i7mFATlcrasD9z1Y_e0FGTHkJ7SFWp5vQiE7MvyUYAhRvirmRWvPaZs_WMvyiJHPQbmvXkPdgePCD2QiU9ODuVRkTCS-a-arQpGW8.ONDIlr_gvc25Z9IDDKg3K9vsQm3wBbx4S5kjVDrbtBU&dib_tag=se&keywords=nexon+ev+tyre&qid=1783843955&sprefix=nexon+ev+tyr%2Caps%2C382&sr=8-3&linkCode=ll2&tag=evtime-21&linkId=c09c1ddbde8c4823bab3c28425616059&ref_=as_li_ss_tl" target="_blank" rel="noopener noreferrer" className="inline-block w-full py-2 bg-primary text-primary-foreground font-semibold rounded-lg hover:opacity-90 transition-opacity">
+                     View on Amazon
                    </a>
                 </div>
-                <button onClick={() => setShowPremiumDialog(true)} className="absolute top-2 right-2 text-[10px] bg-background/50 backdrop-blur rounded px-2 py-1 text-amber-500 hover:bg-amber-500/10 opacity-0 group-hover:opacity-100 transition-all">Remove Ads</button>
+                <button onClick={() => setShowPremiumDialog(true)} className="absolute top-2 right-2 text-[10px] bg-background/50 backdrop-blur rounded px-2 py-1 text-cyan-500 hover:bg-cyan-500/10 opacity-0 group-hover:opacity-100 transition-all">Remove Ads</button>
              </div>
           </div>
         )}
@@ -52,7 +52,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
             <div className="w-full max-w-4xl mx-auto bg-[#0a0a0a] border border-green-500/30 rounded-2xl shadow-[var(--neon-glow)] overflow-hidden relative group my-4">
                <div className="absolute top-2 left-2 z-10 bg-black/60 px-2 py-1 rounded text-[8px] text-green-500/50 uppercase tracking-widest font-mono border border-green-500/20">Sponsored</div>
                <AffiliateCarousel selectedCar={null} />
-               <button onClick={() => setShowPremiumDialog(true)} className="absolute bottom-2 right-2 text-[10px] text-amber-500 hover:underline opacity-0 group-hover:opacity-100 transition-opacity z-20 bg-background/80 px-2 rounded">Remove Ads</button>
+               <button onClick={() => setShowPremiumDialog(true)} className="absolute bottom-2 right-2 text-[10px] text-cyan-500 hover:underline opacity-0 group-hover:opacity-100 transition-opacity z-20 bg-background/80 px-2 rounded">Remove Ads</button>
             </div>
           )}
           
@@ -62,7 +62,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
           {FEATURE_FLAGS.ENABLE_ADS && !isPremium && (
             <div className="w-full max-w-4xl mx-auto h-20 bg-[var(--card-bg)] border border-[var(--glass-border)] rounded-xl my-4 mt-12 flex items-center justify-center text-[var(--muted-foreground)] text-sm shadow-sm relative group">
                <span>Ad Space Placeholder (Responsive)</span>
-               <button onClick={() => setShowPremiumDialog(true)} className="absolute right-4 text-[10px] text-amber-500 hover:underline opacity-0 group-hover:opacity-100 transition-opacity">Remove Ads</button>
+               <button onClick={() => setShowPremiumDialog(true)} className="absolute right-4 text-[10px] text-cyan-500 hover:underline opacity-0 group-hover:opacity-100 transition-opacity">Remove Ads</button>
             </div>
           )}
         </div>
@@ -73,7 +73,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
              <div className="w-full bg-[#0a0a0a] border border-green-500/30 rounded-3xl shadow-[var(--neon-glow)] overflow-hidden relative group min-h-[300px]">
                 <div className="absolute top-2 left-2 z-10 bg-black/60 px-2 py-1 rounded text-[8px] text-green-500/50 uppercase tracking-widest font-mono border border-green-500/20">Sponsored</div>
                 <AffiliateCarousel selectedCar={null} />
-                <button onClick={() => setShowPremiumDialog(true)} className="absolute top-2 right-2 text-[10px] bg-background/50 backdrop-blur rounded px-2 py-1 text-amber-500 hover:bg-amber-500/10 opacity-0 group-hover:opacity-100 transition-all z-20">Remove Ads</button>
+                <button onClick={() => setShowPremiumDialog(true)} className="absolute top-2 right-2 text-[10px] bg-background/50 backdrop-blur rounded px-2 py-1 text-cyan-500 hover:bg-cyan-500/10 opacity-0 group-hover:opacity-100 transition-all z-20">Remove Ads</button>
              </div>
           </div>
         )}
@@ -104,9 +104,9 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
            
            {/* Account / Premium Button */}
            {FEATURE_FLAGS.ENABLE_PRO && (
-             <button onClick={() => setShowPremiumDialog(true)} className="text-[var(--muted-foreground)] hover:text-amber-500 transition-colors flex flex-col items-center gap-1">
-               <User className={`w-6 h-6 ${isPremium ? 'text-amber-500' : ''}`} />
-               <span className={`text-[10px] font-semibold ${isPremium ? 'text-amber-500' : ''}`}>{user ? 'PRO' : 'Login'}</span>
+             <button onClick={() => setShowPremiumDialog(true)} className="text-[var(--muted-foreground)] hover:text-cyan-500 transition-colors flex flex-col items-center gap-1">
+               <User className={`w-6 h-6 ${isPremium ? 'text-cyan-500' : ''}`} />
+               <span className={`text-[10px] font-semibold ${isPremium ? 'text-cyan-500' : ''}`}>{user ? 'PRO' : 'Login'}</span>
              </button>
            )}
         </nav>

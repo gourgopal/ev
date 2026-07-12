@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Share_Tech_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/components/auth-provider";
@@ -7,6 +7,13 @@ import { LayoutWrapper } from "@/components/layout-wrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+
+const shareTechMono = Share_Tech_Mono({
+  weight: '400',
+  variable: "--font-share-tech-mono",
   subsets: ["latin"],
 });
 
@@ -48,7 +55,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${shareTechMono.variable} antialiased`}
       >
         <ThemeProvider
           attribute="class"

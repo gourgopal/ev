@@ -101,6 +101,7 @@ export default function EVChargingCalculator({
   const [isSharing, setIsSharing] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [tickerIndex, setTickerIndex] = useState(0);
+  const [lcdScreenIndex, setLcdScreenIndex] = useState(0);
   useEffect(() => {
     const interval = setInterval(() => {
       setTickerIndex(prev => (prev + 1) % 3);
@@ -783,66 +784,90 @@ export default function EVChargingCalculator({
                 )}
               </div>
 
-              {/* Main LCD Display & Unified Results */}
-              <div className="flex-grow flex flex-col items-center justify-center py-4 space-y-4 md:space-y-6">
+              {/* Main LCD Display & Unified Results (Sliding Carousel) */}
+              <div className="flex-grow flex flex-col items-center justify-center py-6 space-y-4 md:space-y-6 relative overflow-hidden group">
                  
-                 {/* 1. Animated SoC */}
-                 <div className={`text-[80px] md:text-[120px] font-black text-transparent bg-clip-text leading-none drop-shadow-[0_0_15px_rgba(74,222,128,0.5)] ${isSimulating ? "bg-gradient-to-b from-amber-300 to-amber-600" : "bg-gradient-to-b from-green-300 to-green-600"}`}>
-                   {isSimulating ? (
-                     <>{Math.floor(simSoc)}<span className="text-4xl md:text-5xl">{(simSoc % 1).toFixed(2).substring(1)}%</span></>
-                   ) : (
-                     <>{Math.floor(Number(startSoc))}<span className="text-4xl md:text-5xl">{(Number(startSoc) % 1).toFixed(2).substring(1)}%</span></>
-                   )}
-                 </div>
+                 {/* Navigation Chevrons */}
+                 <button 
+                   onClick={() => setLcdScreenIndex(0)} 
+                   className={`absolute left-0 top-1/2 -translate-y-1/2 z-20 p-2 text-green-500 hover:text-green-300 transition-all ${lcdScreenIndex === 0 ? 'opacity-0 pointer-events-none' : 'opacity-50 hover:opacity-100'}`}
+                 >
+                   <ChevronLeft className="w-8 h-8" />
+                 </button>
+                 
+                 <button 
+                   onClick={() => setLcdScreenIndex(1)} 
+                   className={`absolute right-0 top-1/2 -translate-y-1/2 z-20 p-2 text-green-500 hover:text-green-300 transition-all ${lcdScreenIndex === 1 ? 'opacity-0 pointer-events-none' : 'opacity-50 hover:opacity-100'}`}
+                 >
+                   <ChevronRight className="w-8 h-8" />
+                 </button>
 
-                 {/* 2. The Time */}
-                 {result ? (
-                   <div className="text-4xl md:text-5xl font-black font-mono text-green-400 drop-shadow-[0_0_15px_rgba(74,222,128,0.5)] text-center leading-tight">
-                     {isSimulating ? (() => {
-                          const elapsedMins = ((((simSoc - Number(startSoc)) / 100) * Number(capacity) / (Number(efficiency)/100)) / (Number(chargerKw) * (Number(efficiency)/100))) * 60;
-                          const hrs = Math.floor(elapsedMins / 60);
-                          const mins = Math.floor(elapsedMins % 60);
-                          const secs = Math.floor((elapsedMins * 60) % 60);
-                          return <span>in {hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m ${secs}s`}</span>;
-                     })() : (
-                       <span>in {result.hrs > 0 ? `${result.hrs}h ${result.mins}m` : `${result.mins}m`}</span>
+                 <div className="flex w-[200%] transition-transform duration-500 ease-in-out" style={{ transform: `translateX(-${lcdScreenIndex * 50}%)` }}>
+                   
+                   {/* SLIDE 1: Main Stats */}
+                   <div className="w-1/2 flex flex-col items-center justify-center space-y-4 shrink-0">
+                     <div className={`text-[90px] md:text-[140px] font-black text-transparent bg-clip-text leading-none drop-shadow-[0_0_15px_rgba(74,222,128,0.5)] font-[family-name:var(--font-share-tech-mono)] ${isSimulating ? "bg-gradient-to-b from-amber-300 to-amber-600" : "bg-gradient-to-b from-green-300 to-green-600"}`}>
+                       {isSimulating ? (
+                         <>{Math.floor(simSoc)}<span className="text-4xl md:text-5xl">{(simSoc % 1).toFixed(2).substring(1)}%</span></>
+                       ) : (
+                         <>{Math.floor(Number(startSoc))}<span className="text-4xl md:text-5xl">{(Number(startSoc) % 1).toFixed(2).substring(1)}%</span></>
+                       )}
+                     </div>
+
+                     {result ? (
+                       <div className="text-4xl md:text-6xl font-black text-green-400 drop-shadow-[0_0_15px_rgba(74,222,128,0.5)] text-center leading-tight font-[family-name:var(--font-share-tech-mono)] tracking-wider">
+                         {isSimulating ? (() => {
+                              const elapsedMins = ((((simSoc - Number(startSoc)) / 100) * Number(capacity) / (Number(efficiency)/100)) / (Number(chargerKw) * (Number(efficiency)/100))) * 60;
+                              const hrs = Math.floor(elapsedMins / 60);
+                              const mins = Math.floor(elapsedMins % 60);
+                              const secs = Math.floor((elapsedMins * 60) % 60);
+                              return <span>{hrs > 0 ? `${hrs}H ${mins}M` : `${mins}M ${secs}S`}</span>;
+                         })() : (
+                           <span>{result.hrs > 0 ? `${result.hrs}H ${result.mins}M` : `${result.mins}M`}</span>
+                         )}
+                       </div>
+                     ) : (
+                       <div className="text-red-400 text-sm border border-red-500/20 bg-red-950/20 px-4 py-2 rounded-lg font-mono">Invalid Target</div>
                      )}
+                     
+                     <div className="flex gap-2 mt-4 text-[10px] text-green-500/50 uppercase tracking-widest font-mono">
+                        <span className={`w-2 h-2 rounded-full ${lcdScreenIndex === 0 ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]' : 'bg-green-500/20'}`}></span>
+                        <span className={`w-2 h-2 rounded-full ${lcdScreenIndex === 1 ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]' : 'bg-green-500/20'}`}></span>
+                     </div>
                    </div>
-                 ) : (
-                   <div className="text-red-400 text-sm border border-red-500/20 bg-red-950/20 px-4 py-2 rounded-lg">Start SoC must be less than Target SoC</div>
-                 )}
-                 
-                 {/* 3. Sliding Information Ticker */}
-                 {result && (
-                   <div className="w-full max-w-sm h-12 bg-black border border-green-500/20 rounded-lg overflow-hidden relative flex items-center justify-center shadow-[inset_0_0_10px_rgba(34,197,94,0.1)]">
-                      <div className="absolute top-0 bottom-0 left-0 w-8 bg-gradient-to-r from-black to-transparent z-10"></div>
-                      <div className="absolute top-0 bottom-0 right-0 w-8 bg-gradient-to-l from-black to-transparent z-10"></div>
-                      
-                      {tickerIndex === 0 && (
-                        <div className="animate-in slide-in-from-bottom-4 fade-in duration-500 text-sm font-mono text-green-400 flex items-center gap-2">
-                          <Activity className="w-4 h-4 text-green-500/60" /> Target: {endSoc}% | Power: {chargerKw}kW
-                        </div>
-                      )}
-                      {tickerIndex === 1 && (
-                        <div className="animate-in slide-in-from-bottom-4 fade-in duration-500 text-sm font-mono text-green-400 flex items-center gap-2">
-                          <Activity className="w-4 h-4 text-green-500/60" /> Range Gained: +{Math.round(result.rangeGained)} {rangeUnit}
-                        </div>
-                      )}
-                      {tickerIndex === 2 && (
-                        <div className="animate-in slide-in-from-bottom-4 fade-in duration-500 text-sm font-mono text-green-400 flex items-center gap-2">
-                          <Activity className="w-4 h-4 text-green-500/60" /> Est Cost: {currency}{result.totalCost.toFixed(2)}
-                        </div>
-                      )}
-                   </div>
-                 )}
 
-                 {/* 4. See Details Button */}
-                 {result && (
-                   <button onClick={() => setShowDetailsModal(true)} className="mt-2 w-full max-w-sm flex items-center justify-center gap-2 text-xs text-green-300 bg-green-500/10 px-4 py-3 rounded-xl border border-green-500/30 hover:bg-green-500/20 transition-colors uppercase tracking-widest font-bold h-full">
-                     <Info className="w-4 h-4" /> View Full Session Details
-                   </button>
-                 )}
-                 
+                   {/* SLIDE 2: Detailed Stats */}
+                   <div className="w-1/2 flex flex-col items-center justify-center p-4 shrink-0 font-[family-name:var(--font-share-tech-mono)]">
+                      {result ? (
+                        <div className="w-full max-w-sm space-y-4">
+                           <div className="bg-green-950/20 border border-green-500/20 rounded-xl p-4">
+                              <p className="text-green-500/60 uppercase tracking-widest text-xs mb-3 font-sans font-bold">Session Overview</p>
+                              <div className="space-y-3 text-lg text-green-400">
+                                <div className="flex justify-between items-end border-b border-green-500/10 pb-2">
+                                  <span className="text-sm text-green-500/80">Range Gained</span>
+                                  <span className="text-2xl text-green-300 drop-shadow-[0_0_8px_rgba(74,222,128,0.5)]">+{Math.round(result.rangeGained)} {rangeUnit}</span>
+                                </div>
+                                <div className="flex justify-between items-end border-b border-green-500/10 pb-2">
+                                  <span className="text-sm text-green-500/80">Est Cost</span>
+                                  <span className="text-2xl text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]">{currency}{result.totalCost.toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between items-end">
+                                  <span className="text-sm text-green-500/80">Target / Power</span>
+                                  <span className="text-xl text-blue-400">{endSoc}% / {chargerKw}kW</span>
+                                </div>
+                              </div>
+                           </div>
+                           
+                           <button onClick={() => setShowDetailsModal(true)} className="w-full font-sans text-xs font-bold uppercase tracking-widest py-3 border border-green-500/30 rounded-xl text-green-300 hover:bg-green-500/10 transition-colors">
+                             Show More Analytics
+                           </button>
+                        </div>
+                      ) : (
+                        <div className="text-green-500/50">Awaiting simulation data...</div>
+                      )}
+                   </div>
+
+                 </div>
               </div>
 
               {/* Details Modal */}
