@@ -4,14 +4,14 @@ import { CreditCard, Gauge, Camera, ShoppingCart, Zap, Brush, Car } from "lucide
 
 export function AffiliateCarousel({ selectedCar }: { selectedCar: EVCar | null | undefined }) {
   const [adIndex, setAdIndex] = useState(0);
-  
+
   const isNexon = selectedCar?.model.toLowerCase().includes("nexon");
 
   const AD_BANNERS = [
     {
       type: 'credit_card',
       icon: <CreditCard className="w-5 h-5" />,
-      title: "10% Cashback on Charging",
+      title: "Up to 10% savings everytime you shop!",
       desc: "Tata Neu HDFC Credit Card. Zero Joining Fee!",
       url: "https://www.tataneu.com/v2/finance/creditcard/product-detail?referralCode=GOUR6250&utm_content=GOUR6250",
       buttonText: "Apply Now"
@@ -75,7 +75,7 @@ export function AffiliateCarousel({ selectedCar }: { selectedCar: EVCar | null |
   }
 
   return (
-    <a 
+    <a
       href={url}
       target="_blank" rel="noopener noreferrer"
       className="mt-4 p-3 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-between hover:bg-orange-500/20 transition-colors font-sans group animate-in fade-in"
