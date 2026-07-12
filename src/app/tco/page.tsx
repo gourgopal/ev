@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { TrendingDown, Car, BatteryCharging, ShieldAlert, LineChart as LineChartIcon } from "lucide-react";
+import { useState, useRef } from "react";
+import { TrendingDown, Car, BatteryCharging, Share2, Clock3, LineChart as LineChartIcon } from "lucide-react";
 import { I18nProvider, useI18n } from "@/components/i18n-provider";
+import { toBlob } from "html-to-image";
 import {
   LineChart,
   Line,
@@ -37,6 +38,43 @@ function TCOContent() {
   // Logic
   const evRunningCostPerKm = (evEfficiency / 1000) * elecCost;
   const iceRunningCostPerKm = fuelCost / iceEfficiency;
+
+  const [isSharing, setIsSharing] = useState(false);
+  const shareRef = useRef<HTMLDivElement>(null);
+
+  const handleShare = async () => {
+    if (!shareRef.current) return;
+    setIsSharing(true);
+    try {
+      const blob = await toBlob(shareRef.current, {
+        backgroundColor: 'var(--background)',
+        pixelRatio: 2,
+        style: { margin: '0' }
+      });
+      if (!blob) throw new Error("Could not create image blob");
+      
+      const file = new File([blob], 'tco-analysis.png', { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: 'My TCO Analysis',
+          text: 'Check out my EV vs ICE Total Cost of Ownership!',
+        });
+      } else {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'tco-analysis.png';
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error("Error sharing image:", error);
+      alert("Sharing failed. You can still take a screenshot!");
+    } finally {
+      setIsSharing(false);
+    }
+  };
 
   const data = [];
   let breakEvenYear = null;
@@ -209,26 +247,39 @@ function TCOContent() {
              </div>
 
              {/* Results Summary */}
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className={`glass-panel p-6 ${breakEvenYear ? 'bg-green-500/10 border-green-500/30' : 'bg-red-500/10 border-red-500/30'}`}>
-                   <h3 className="text-sm uppercase tracking-widest text-[var(--muted-foreground)] mb-2">Break-Even Point</h3>
-                   <div className="text-3xl font-black font-mono">
-                     {breakEvenYear ? `Year ${breakEvenYear}` : "Never"}
-                   </div>
-                   <p className="text-sm mt-2">
-                     {breakEvenYear ? `The EV becomes cheaper to own in year ${breakEvenYear}.` : `The EV upfront premium is too high to recover with these running costs.`}
-                   </p>
-                </div>
-
-                <div className="glass-panel p-6">
-                   <h3 className="text-sm uppercase tracking-widest text-[var(--muted-foreground)] mb-2">Total Net Savings ({years} Yrs)</h3>
-                   <div className={`text-3xl font-black font-mono ${finalEVSavings > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                     {finalEVSavings > 0 ? '+' : ''}{currency}{finalEVSavings.toLocaleString()}
-                   </div>
-                   <p className="text-sm mt-2 text-[var(--muted-foreground)]">
-                     Difference in total out-of-pocket costs at the end of year {years}.
-                   </p>
-                </div>
+             <div ref={shareRef} className="bg-[var(--background)] p-4 rounded-xl -mx-4 md:mx-0">
+               <div className="flex justify-between items-center mb-4 px-2">
+                 <h2 className="font-bold text-lg tracking-wider">Analysis Summary</h2>
+                 <button 
+                    onClick={handleShare}
+                    disabled={isSharing}
+                    className="flex items-center gap-1.5 text-xs font-semibold text-primary bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-full transition-colors"
+                  >
+                    {isSharing ? <Clock3 className="w-4 h-4 animate-spin" /> : <Share2 className="w-4 h-4" />}
+                    {isSharing ? "Generating..." : "Share Result"}
+                  </button>
+               </div>
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className={`glass-panel p-6 ${breakEvenYear ? 'bg-green-500/10 border-green-500/30' : 'bg-red-500/10 border-red-500/30'}`}>
+                     <h3 className="text-sm uppercase tracking-widest text-[var(--muted-foreground)] mb-2">Break-Even Point</h3>
+                     <div className="text-3xl font-black font-mono">
+                       {breakEvenYear ? `Year ${breakEvenYear}` : "Never"}
+                     </div>
+                     <p className="text-sm mt-2">
+                       {breakEvenYear ? `The EV becomes cheaper to own in year ${breakEvenYear}.` : `The EV upfront premium is too high to recover with these running costs.`}
+                     </p>
+                  </div>
+  
+                  <div className="glass-panel p-6">
+                     <h3 className="text-sm uppercase tracking-widest text-[var(--muted-foreground)] mb-2">Total Net Savings ({years} Yrs)</h3>
+                     <div className={`text-3xl font-black font-mono ${finalEVSavings > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                       {finalEVSavings > 0 ? '+' : ''}{currency}{finalEVSavings.toLocaleString()}
+                     </div>
+                     <p className="text-sm mt-2 text-[var(--muted-foreground)]">
+                       Difference in total out-of-pocket costs at the end of year {years}.
+                     </p>
+                  </div>
+               </div>
              </div>
           </div>
         </div>

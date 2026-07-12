@@ -116,31 +116,34 @@ export function EVProvider({ children }: { children: React.ReactNode }) {
     window.dispatchEvent(new CustomEvent("play-music"));
     
     // Start native ticker
+    const tickRateMs = 50; // smooth 50ms UI updates
+    let currentDecimalSoc = payload.startSoc;
+
     simIntervalRef.current = setInterval(() => {
-      setSimSoc(prevSoc => {
-        const nextSoc = prevSoc + 1;
-        
-        // Handle notifications
+      currentDecimalSoc += (tickRateMs / payload.intervalSpeed);
+      
+      setSimSoc((prevSoc) => {
+        // Handle notifications based on whole integers
         const now = Date.now();
         if (now - lastNotificationRef.current >= 5000) {
           lastNotificationRef.current = now;
-          const math = calculateFinalMath(nextSoc, payload);
+          const math = calculateFinalMath(currentDecimalSoc, payload);
           sendNativeNotification(
-            `Charging: ${nextSoc}%`,
+            `Charging: ${Math.floor(currentDecimalSoc)}%`,
             `Cost: ${payload.currency}${math.currentCost} • Range: +${math.rangeGained}km`
           );
         }
         
         // Handle completion
-        if (nextSoc >= payload.endSoc) {
+        if (currentDecimalSoc >= payload.endSoc) {
           if (simIntervalRef.current) clearInterval(simIntervalRef.current);
-          handleStop("COMPLETED", nextSoc, payload);
-          return nextSoc;
+          handleStop("COMPLETED", payload.endSoc, payload);
+          return payload.endSoc;
         }
         
-        return nextSoc;
+        return currentDecimalSoc;
       });
-    }, payload.intervalSpeed);
+    }, tickRateMs);
   };
 
   const handleStop = (reason: string, finalSoc: number, session: any) => {
@@ -203,26 +206,31 @@ export function EVProvider({ children }: { children: React.ReactNode }) {
     setIsPaused(false);
     sendNativeNotification("Charging Resumed ▶️", `Simulation resumed.`);
     
+    const tickRateMs = 50;
+    let currentDecimalSoc = simSoc; // Resume from current float value
+
     simIntervalRef.current = setInterval(() => {
-      setSimSoc(prevSoc => {
-        const nextSoc = prevSoc + 1;
+      currentDecimalSoc += (tickRateMs / activeSession.intervalSpeed);
+      
+      setSimSoc(() => {
         const now = Date.now();
         if (now - lastNotificationRef.current >= 5000) {
           lastNotificationRef.current = now;
-          const math = calculateFinalMath(nextSoc, activeSession);
+          const math = calculateFinalMath(currentDecimalSoc, activeSession);
           sendNativeNotification(
-            `Charging: ${nextSoc}%`,
+            `Charging: ${Math.floor(currentDecimalSoc)}%`,
             `Cost: ${activeSession.currency}${math.currentCost} • Range: +${math.rangeGained}km`
           );
         }
         
-        if (nextSoc >= activeSession.endSoc) {
+        if (currentDecimalSoc >= activeSession.endSoc) {
           if (simIntervalRef.current) clearInterval(simIntervalRef.current);
-          handleStop("COMPLETED", nextSoc, activeSession);
+          handleStop("COMPLETED", activeSession.endSoc, activeSession);
+          return activeSession.endSoc;
         }
-        return nextSoc;
+        return currentDecimalSoc;
       });
-    }, activeSession.intervalSpeed);
+    }, tickRateMs);
   };
 
   const clearHistory = () => {

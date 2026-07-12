@@ -17,9 +17,11 @@ import {
   Clock3,
   X,
   History,
-  SignalHigh
+  SignalHigh,
+  Share2
 } from "lucide-react";
 import { EV_CARS, EVCar } from "@/lib/ev-cars";
+import { toBlob } from "html-to-image";
 
 type ChargeHistoryItem = {
   id: string;
@@ -78,8 +80,10 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
   } = useEV();
 
   const [showHistory, setShowHistory] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const shareRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -255,6 +259,39 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
       setWhPerKm(w => Math.round(Number(w) * whFactor));
       return isCurrentlyKm ? 'miles' : 'km';
     });
+  };
+
+  const handleShare = async () => {
+    if (!shareRef.current) return;
+    setIsSharing(true);
+    try {
+      const blob = await toBlob(shareRef.current, {
+        backgroundColor: '#0a0a0a',
+        pixelRatio: 2,
+      });
+      if (!blob) throw new Error("Could not create image blob");
+      
+      const file = new File([blob], 'ev-charging-receipt.png', { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: 'EV Charging Receipt',
+          text: 'Here is my EV charging session receipt!',
+        });
+      } else {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'ev-charging-receipt.png';
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error("Error sharing image:", error);
+      alert("Sharing failed. You can still take a screenshot!");
+    } finally {
+      setIsSharing(false);
+    }
   };
 
   return (
@@ -560,86 +597,104 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
 
         </div>
 
-        {/* Right Column: Results Dashboard */}
+        {/* Right Column: Results Dashboard (Unified LED Screen) */}
         <div className="lg:col-span-5">
-          {isSimulating ? (
-            <div className="rounded-3xl p-6 lg:p-8 sticky top-24 flex flex-col h-full min-h-[600px] space-y-6 bg-[#0a0a0a] text-green-400 border border-green-500/30 relative overflow-hidden ring-1 ring-green-500/20 shadow-[0_0_40px_rgba(34,197,94,0.15)] font-mono">
-               
-               {/* LCD Screen Lines Effect */}
-               <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(255,255,255,0)_50%,rgba(0,0,0,1)_50%)] bg-[length:100%_4px] z-20"></div>
-               
-               <div className="relative z-10 flex flex-col h-full items-center justify-between">
-                  {/* Top Bar */}
-                  <div className="w-full flex justify-between items-center text-xs tracking-widest text-green-500/70 border-b border-green-500/20 pb-4">
-                    <span className="flex items-center gap-2"><SignalHigh className="w-4 h-4" /> STATION: ONLINE</span>
-                    <span className="animate-pulse">● SESSION ACTIVE</span>
-                  </div>
-                  
-                  {/* Main LCD Display */}
-                  <div className="relative w-full flex-grow flex items-center justify-center group cursor-crosshair">
-                     {/* Circular Glow */}
-                     <div className="absolute w-64 h-64 bg-green-500/5 rounded-full blur-3xl opacity-50"></div>
-                     
-                     {/* The SoC Text */}
-                     <div className="text-[120px] font-black text-transparent bg-clip-text bg-gradient-to-b from-green-300 to-green-600 drop-shadow-[0_0_15px_rgba(74,222,128,0.5)] leading-none transition-transform duration-500 group-hover:scale-90 group-hover:opacity-10">
-                        {simSoc}<span className="text-6xl">%</span>
-                     </div>
-                     
-                     {/* Hover overlay 2D Animation */}
-                     <div className="absolute inset-0 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10">
-                        {/* LED bar */}
-                        <div className="w-3/4 h-8 bg-black border border-green-500/30 rounded-full p-1 mb-6 relative overflow-hidden">
-                           <div 
-                             className="h-full bg-gradient-to-r from-green-600 to-green-400 rounded-full shadow-[0_0_10px_rgba(74,222,128,0.8)] transition-all duration-300 ease-out relative"
-                             style={{ width: `${simSoc}%` }}
-                           >
-                              <div className="absolute right-0 top-0 bottom-0 w-4 bg-white/30 animate-pulse"></div>
-                           </div>
-                        </div>
-                        
-                        <div className="grid grid-cols-2 gap-x-8 gap-y-4 text-center">
-                           <div>
-                             <p className="text-[10px] text-green-500/60 uppercase">Speed</p>
-                             <p className="text-xl">{chargerKw} kW</p>
-                           </div>
-                           <div>
-                             <p className="text-[10px] text-green-500/60 uppercase">Time Elapsed</p>
-                             <p className="text-xl">
-                               {Math.floor(((((simSoc - Number(startSoc)) / 100) * Number(capacity) / (Number(efficiency)/100)) / (Number(chargerKw) * (Number(efficiency)/100))) * 60)} m
-                             </p>
-                           </div>
-                           <div className="col-span-2">
-                             <p className="text-[10px] text-green-500/60 uppercase">Energy Drawn</p>
-                             <p className="text-xl text-green-300">{((simSoc - Number(startSoc)) / 100 * Number(capacity)).toFixed(1)} kWh</p>
-                           </div>
-                        </div>
-                     </div>
-                  </div>
-                  
-                  {/* Bottom Stats Panel */}
-                  <div className="w-full grid grid-cols-2 gap-4 border-t border-green-500/20 pt-6">
-                     <div className="bg-green-950/30 p-4 rounded-xl border border-green-500/10">
+          <div className="rounded-3xl p-6 lg:p-8 sticky top-24 flex flex-col h-full min-h-[650px] space-y-6 bg-[#0a0a0a] text-green-400 border border-green-500/30 relative overflow-hidden ring-1 ring-green-500/20 shadow-[0_0_40px_rgba(34,197,94,0.15)] font-mono">
+            
+            {/* LCD Screen Lines Effect */}
+            <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(255,255,255,0)_50%,rgba(0,0,0,1)_50%)] bg-[length:100%_4px] z-20"></div>
+            
+            <div className="relative z-10 flex flex-col h-full justify-between">
+              {/* Top Bar */}
+              <div className="w-full flex justify-between items-center text-xs tracking-widest text-green-500/70 border-b border-green-500/20 pb-4">
+                <span className="flex items-center gap-2"><SignalHigh className="w-4 h-4" /> STATION: ONLINE</span>
+                {isSimulating ? (
+                  <span className="animate-pulse text-amber-400">● CHARGING ACTIVE</span>
+                ) : (
+                  <span>● READY</span>
+                )}
+              </div>
+              
+              {/* Main LCD Display */}
+              <div className="relative w-full py-8 flex items-center justify-center group cursor-crosshair">
+                 {/* Circular Glow */}
+                 <div className={`absolute w-64 h-64 rounded-full blur-3xl opacity-30 ${isSimulating ? 'bg-amber-500/20 animate-pulse' : 'bg-green-500/10'}`}></div>
+                 
+                 {/* The SoC Text */}
+                 <div className={`text-[120px] font-black text-transparent bg-clip-text leading-none drop-shadow-[0_0_15px_rgba(74,222,128,0.5)] ${isSimulating ? 'bg-gradient-to-b from-amber-300 to-amber-600' : 'bg-gradient-to-b from-green-300 to-green-600'}`}>
+                    {isSimulating ? Math.floor(simSoc) : startSoc}<span className="text-6xl">%</span>
+                 </div>
+              </div>
+              
+              {/* Target & Speed */}
+              <div className="grid grid-cols-2 gap-4 text-center border-b border-green-500/20 pb-4 mb-4">
+                 <div>
+                   <p className="text-[10px] text-green-500/60 uppercase">Target SoC</p>
+                   <p className="text-2xl font-bold">{endSoc}%</p>
+                 </div>
+                 <div>
+                   <p className="text-[10px] text-green-500/60 uppercase">Output Power</p>
+                   <p className="text-2xl font-bold">{chargerKw} kW</p>
+                 </div>
+              </div>
+
+              {/* Math Breakdown / Estimates */}
+              {result ? (
+                <div className="space-y-4 mb-6 flex-grow flex flex-col">
+                   <div className="bg-green-950/40 border border-green-500/20 rounded-xl p-3 text-xs leading-relaxed font-sans">
+                     <p className="text-green-500/60 mb-1 uppercase tracking-widest font-bold text-[10px] font-mono">Session Metrics</p>
+                     <p>1% Charge = <strong>{((Number(capacity) / (Number(efficiency)/100)) / 100).toFixed(2)} kWh</strong></p>
+                     <p>Cost per 1% = <strong>{currency}{(((Number(capacity) / (Number(efficiency)/100)) / 100) * Number(costPerKwh)).toFixed(2)}</strong></p>
+                     <p>Range per 1% = <strong>+{Math.round(Number(customRange) / 100)} {rangeUnit}</strong></p>
+                   </div>
+                   
+                   <div className="grid grid-cols-2 gap-4 mt-auto">
+                      <div className="bg-green-950/20 p-3 rounded-lg border border-green-500/10">
+                        <p className="text-[10px] text-green-500/60 uppercase mb-1">Total Est. Cost</p>
+                        <p className="text-xl text-amber-400 font-bold">{currency}{isSimulating ? (((simSoc - Number(startSoc)) / 100) * Number(capacity) / (Number(efficiency)/100) * Number(costPerKwh)).toFixed(2) : result.totalCost.toFixed(2)}</p>
+                      </div>
+                      <div className="bg-green-950/20 p-3 rounded-lg border border-green-500/10">
                         <p className="text-[10px] text-green-500/60 uppercase mb-1">Range Gained</p>
-                        <p className="text-2xl font-bold">+{Math.round(((simSoc - Number(startSoc)) / 100) * Number(customRange))} <span className="text-sm font-normal text-green-500/60">{rangeUnit}</span></p>
-                     </div>
-                     <div className="bg-green-950/30 p-4 rounded-xl border border-green-500/10">
-                        <p className="text-[10px] text-green-500/60 uppercase mb-1">Total Range</p>
-                        <p className="text-2xl font-bold">{Math.round((simSoc / 100) * Number(customRange))} <span className="text-sm font-normal text-green-500/60">{rangeUnit}</span></p>
-                     </div>
-                     <div className="bg-green-950/30 p-4 rounded-xl border border-green-500/10 col-span-2 flex justify-between items-end">
-                        <div>
-                           <p className="text-[10px] text-green-500/60 uppercase mb-1">Est. Cost</p>
-                           <p className="text-3xl font-bold text-amber-400 drop-shadow-[0_0_10px_rgba(251,191,36,0.3)]">{currency}{(((simSoc - Number(startSoc)) / 100) * Number(capacity) / (Number(efficiency)/100) * Number(costPerKwh)).toFixed(2)}</p>
-                        </div>
-                        <div className="text-right">
-                           <p className="text-[10px] text-green-500/60 uppercase mb-1">Input Power</p>
-                           <p className="text-xl text-green-400">{chargerKw} kW</p>
-                        </div>
-                     </div>
+                        <p className="text-xl text-green-400 font-bold">+{isSimulating ? Math.round(((simSoc - Number(startSoc)) / 100) * Number(customRange)) : Math.round(result.rangeGained)} {rangeUnit}</p>
+                      </div>
+                      <div className="bg-green-950/20 p-3 rounded-lg border border-green-500/10 col-span-2 flex justify-between items-center">
+                        <p className="text-[10px] text-green-500/60 uppercase mb-1">{isSimulating ? "Time Elapsed" : "Time Estimated"}</p>
+                        {isSimulating ? (
+                          <p className="text-xl font-bold text-white">
+                            {Math.floor(((((simSoc - Number(startSoc)) / 100) * Number(capacity) / (Number(efficiency)/100)) / (Number(chargerKw) * (Number(efficiency)/100))) * 60)} mins
+                          </p>
+                        ) : (
+                          <p className="text-xl font-bold text-white">{result.hrs}h {result.mins}m</p>
+                        )}
+                      </div>
+                   </div>
+                </div>
+              ) : (
+                <div className="flex-grow flex items-center justify-center text-red-400 border border-red-500/20 rounded-xl bg-red-950/20 p-4 text-sm text-center font-sans">
+                  ERROR: Start SoC must be less than End SoC to initiate charge.
+                </div>
+              )}
+
+              {/* Controls */}
+              <div className="mt-auto pt-4 border-t border-green-500/20">
+                {!isSimulating && (
+                  <div className="flex justify-between items-center px-1 mb-3">
+                     <label className="text-xs text-green-500/60 uppercase">Sim Speed</label>
+                     <select 
+                       value={simSpeed}
+                       onChange={(e) => setSimSpeed(Number(e.target.value))}
+                       className="bg-[#0a0a0a] border border-green-500/30 rounded text-xs p-1 outline-none focus:ring-1 focus:ring-green-500 text-green-400 font-mono cursor-pointer"
+                     >
+                       <option value={1}>1x (Real-Time)</option>
+                       <option value={60}>60x (Fast)</option>
+                       <option value={1000}>1000x (Ultra)</option>
+                       <option value={10000}>10000x (Instant)</option>
+                     </select>
                   </div>
-                  
-                  {/* Controls */}
-                  <div className="grid grid-cols-2 gap-4 w-full mt-6">
+                )}
+                
+                {isSimulating ? (
+                  <div className="grid grid-cols-2 gap-4 w-full">
                     <button 
                       onClick={togglePause}
                       className="w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 transition-all font-sans"
@@ -654,191 +709,87 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
                       <StopCircle className="w-5 h-5 animate-pulse" /> Stop
                     </button>
                   </div>
-               </div>
-            </div>
-          ) : result ? (
-            <div className="glass-panel p-6 lg:p-8 sticky top-24 flex flex-col h-full space-y-8">
-              
-              {/* Primary Time Result */}
-              <div>
-                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                  <Zap className="text-yellow-500" /> Estimated Time
-                </h2>
-                <div className="flex items-end gap-2">
-                  <span className="text-6xl font-bold text-primary font-mono">{result.hrs}</span>
-                  <span className="text-xl font-medium mb-2 text-[var(--muted-foreground)]">h</span>
-                  <span className="text-6xl font-bold text-primary font-mono">{result.mins}</span>
-                  <span className="text-xl font-medium mb-2 text-[var(--muted-foreground)]">m</span>
-                </div>
-              </div>
-
-              {/* Charging Timeline */}
-              {showAdvanced && (
-                <div className="space-y-4 animate-in fade-in">
-                  <h3 className="font-medium text-sm text-[var(--muted-foreground)] uppercase tracking-wider">Charging Timeline</h3>
-                  {result.phases.map((phase, i) => (
-                    <div key={i} className="flex justify-between items-center border-b border-[var(--glass-border)] pb-2 last:border-0">
-                      <span className="font-medium">{phase.name}</span>
-                      <span className="font-mono bg-[var(--background)] px-2 py-1 rounded text-sm">
-                        {Math.floor(phase.time)}h {Math.round((phase.time - Math.floor(phase.time)) * 60)}m
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <div className="grid grid-cols-2 gap-4">
-                 <div className="bg-[var(--card-bg)] border border-[var(--glass-border)] p-4 rounded-xl">
-                    <p className="text-sm text-[var(--muted-foreground)] mb-1 uppercase tracking-wider">Range Gained</p>
-                    <p className="text-2xl font-bold text-green-500 font-mono">+{Math.round(result.rangeGained)} {rangeUnit}</p>
-                 </div>
-                 <div className="bg-[var(--card-bg)] border border-[var(--glass-border)] p-4 rounded-xl">
-                    <p className="text-sm text-[var(--muted-foreground)] mb-1 uppercase tracking-wider">Total Cost</p>
-                    <p className="text-2xl font-bold text-red-400 font-mono">{currency}{result.totalCost.toFixed(2)}</p>
-                 </div>
-              </div>
-
-              {/* ICE Savings & CO2 Emissions */}
-              <div className="grid grid-cols-2 gap-4">
-                {/* ICE Savings */}
-                <div className="bg-[var(--card-bg)] border border-[var(--glass-border)] p-4 rounded-xl shadow-inner relative overflow-hidden group">
-                  <div className="absolute -right-4 -top-4 opacity-10">
-                    <TrendingDown className="w-24 h-24 text-green-500" />
-                  </div>
-                  <h3 className="font-semibold text-[var(--muted-foreground)] flex items-center gap-2 mb-1">
-                    <Fuel className="w-4 h-4" /> ICE Comparison
-                  </h3>
-                  {result.savings > 0 ? (
-                    <>
-                      <p className="text-2xl font-bold text-green-500 font-mono">+{currency}{Math.round(result.savings)}</p>
-                      <div className="overflow-hidden transition-all duration-300 max-h-0 opacity-0 group-hover:max-h-20 group-hover:opacity-100">
-                        <p className="text-xs text-[var(--muted-foreground)] mt-2">Vs ICE ({Math.round(result.rangeGained)} {rangeUnit})</p>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <p className="text-2xl font-bold text-red-500 font-mono">{currency}{Math.round(result.savings)}</p>
-                      <div className="overflow-hidden transition-all duration-300 max-h-0 opacity-0 group-hover:max-h-20 group-hover:opacity-100">
-                         <p className="text-xs text-[var(--muted-foreground)] mt-2">EV charging is pricier here.</p>
-                      </div>
-                    </>
-                  )}
-                </div>
-
-                {/* CO2 Emissions */}
-                <div className="bg-[var(--card-bg)] border border-[var(--glass-border)] p-4 rounded-xl shadow-inner relative overflow-hidden flex flex-col justify-between group">
-                  <div>
-                    <h3 className="font-semibold text-[var(--muted-foreground)] flex items-center gap-2 mb-1">
-                      <svg className="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> CO₂ Saved
-                    </h3>
-                    <p className="text-2xl font-bold text-emerald-500 font-mono">{(result.rangeGained * (rangeUnit === 'km' ? 0.12 : 0.19)).toFixed(1)} kg</p>
-                  </div>
-                  <div className="overflow-hidden transition-all duration-300 max-h-0 opacity-0 group-hover:max-h-20 group-hover:opacity-100">
-                     <p className="text-xs text-[var(--muted-foreground)] mt-2">Tailpipe emissions prevented.</p>
-                  </div>
-                </div>
-              </div>
-
-
-              {/* Simulation Block */}              
-              <div className="fixed md:static bottom-24 left-0 right-0 z-50 md:z-auto bg-[var(--background)]/95 md:bg-transparent backdrop-blur-xl md:backdrop-blur-none border-t border-[var(--glass-border)] md:border-transparent p-4 md:p-0 mt-2 md:mt-2 flex flex-col gap-2 shadow-[0_-10px_30px_rgba(0,0,0,0.3)] md:shadow-none">
-                {Number(startSoc) < 20 && (
-                  <div className="mb-1 p-2 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-600 dark:text-orange-400 flex gap-2 items-center text-xs animate-in slide-in-from-bottom-2 fade-in">
-                    <AlertTriangle className="shrink-0 h-4 w-4" />
-                    <p>
-                      <strong>Low Battery (Voltage Sag):</strong> Driving below 20% causes voltage sag, reducing actual range.
-                    </p>
-                  </div>
+                ) : (
+                  <button 
+                    onClick={toggleSimulation}
+                    disabled={!result}
+                    className="w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all bg-green-500 text-[#0a0a0a] hover:bg-green-400 shadow-[0_0_20px_rgba(34,197,94,0.3)] disabled:opacity-50 font-sans"
+                  >
+                    <PlayCircle className="w-6 h-6" /> INITIATE CHARGE
+                  </button>
                 )}
-                <div className="flex justify-between items-center px-1">
-                   <label className="text-sm font-medium text-[var(--muted-foreground)]">Simulation Speed</label>
-                   <div className="flex gap-4 items-center">
-                     {chargeHistory.length > 0 && (
-                       <button 
-                         onClick={() => setShowHistory(true)}
-                         className="text-xs text-primary hover:underline flex items-center gap-1 font-semibold"
-                       >
-                         <Clock3 className="w-3 h-3" /> History
-                       </button>
-                     )}
-                     <select 
-                       value={simSpeed}
-                       onChange={(e) => setSimSpeed(Number(e.target.value))}
-                       className="bg-[var(--background)]/50 border border-[var(--glass-border)] rounded-md text-sm p-1.5 outline-none focus:ring-1 focus:ring-primary font-mono"
-                     >
-                       <option value={1}>1x (Real-Time)</option>
-                       <option value={60}>60x (Fast)</option>
-                       <option value={1000}>1000x (Ultra)</option>
-                       <option value={10000}>10000x (Instant)</option>
-                     </select>
-                   </div>
-                </div>
-                <button 
-                  onClick={toggleSimulation}
-                  className="w-full py-3 md:py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all bg-primary text-primary-foreground hover:opacity-90 shadow-[0_0_15px_rgba(var(--primary-rgb),0.3)] hover:shadow-[0_0_25px_rgba(var(--primary-rgb),0.5)]"
-                >
-                  <PlayCircle className="w-6 h-6" /> Simulate Charging Now
-                </button>
               </div>
-
+              
             </div>
-          ) : (
-            <div className="glass-panel p-8 flex items-center justify-center h-full min-h-[300px] text-[var(--muted-foreground)]">
-              Start SoC must be less than End SoC
-            </div>
-          )}
-          
+          </div>
         </div>
       </div>
 
-      {/* Completion Summary Dialog */}
+      {/* Completion Summary Dialog (LED Receipt) */}
       {completedSummary && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in zoom-in-95 duration-200">
-          <div className="bg-[var(--background)] border border-[var(--glass-border)] rounded-2xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col relative">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-400 to-blue-500"></div>
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200 font-mono">
+          <div className="bg-[#0a0a0a] border border-green-500/30 rounded-2xl w-full max-w-md shadow-[0_0_50px_rgba(34,197,94,0.1)] overflow-hidden flex flex-col relative text-green-400">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-600 to-green-400"></div>
             
-            <div className="p-6 pb-2 text-center">
-              <div className="mx-auto w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mb-4 border border-green-500/20">
-                <BatteryCharging className="w-8 h-8 text-green-500 animate-pulse" />
+            <div ref={shareRef} className="p-6 bg-[#0a0a0a] relative">
+              <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(255,255,255,0)_50%,rgba(0,0,0,1)_50%)] bg-[length:100%_4px] z-20"></div>
+              
+              <div className="text-center mb-6 relative z-30">
+                <div className="mx-auto w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mb-4 border border-green-500/20 shadow-[0_0_15px_rgba(34,197,94,0.2)]">
+                  <BatteryCharging className="w-8 h-8 text-green-400" />
+                </div>
+                <h2 className="text-2xl font-bold mb-1 tracking-widest text-green-300">SESSION COMPLETE</h2>
+                <p className="text-green-500/60 text-xs">STATION TRANSACTION RECEIPT</p>
+                <div className="text-[10px] text-green-500/40 mt-1">{new Date().toLocaleString()}</div>
               </div>
-              <h2 className="text-2xl font-bold mb-1">Charging Complete!</h2>
-              <p className="text-[var(--muted-foreground)] text-sm mb-6">Your simulation has finished successfully.</p>
+              
+              <div className="space-y-4 relative z-30">
+                 <div className="grid grid-cols-2 gap-4">
+                   <div className="bg-green-950/40 p-3 rounded-lg border border-green-500/20 text-center">
+                      <p className="text-[10px] uppercase tracking-wider text-green-500/60 mb-1">State of Charge</p>
+                      <p className="font-bold text-lg text-green-300">{Math.floor(completedSummary.startSoc)}% → {Math.floor(completedSummary.endSoc)}%</p>
+                   </div>
+                   <div className="bg-green-950/40 p-3 rounded-lg border border-green-500/20 text-center">
+                      <p className="text-[10px] uppercase tracking-wider text-green-500/60 mb-1">Time Elapsed</p>
+                      <p className="font-bold text-lg text-green-300">{completedSummary.timeMins} mins</p>
+                   </div>
+                 </div>
+                 
+                 <div className="bg-green-950/20 p-4 rounded-lg border border-green-500/20 space-y-3">
+                    <div className="flex justify-between items-center border-b border-green-500/20 pb-2">
+                      <span className="text-sm text-green-500/80">Vehicle Model</span>
+                      <span className="font-bold text-green-300 text-right">{completedSummary.carModel || "Custom EV"}</span>
+                    </div>
+                    <div className="flex justify-between items-center border-b border-green-500/20 pb-2">
+                      <span className="text-sm text-green-500/80">Range Added</span>
+                      <span className="font-bold text-green-300">+{completedSummary.rangeGained} {rangeUnit}</span>
+                    </div>
+                    <div className="flex justify-between items-center border-b border-green-500/20 pb-2">
+                      <span className="text-sm text-green-500/80">Energy Delivered</span>
+                      <span className="font-bold text-green-300">{completedSummary.energy} kWh</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-green-500/80">Total Cost</span>
+                      <span className="font-bold text-amber-400 text-xl">{currency}{completedSummary.cost}</span>
+                    </div>
+                 </div>
+              </div>
             </div>
             
-            <div className="px-6 space-y-4">
-               <div className="grid grid-cols-2 gap-4">
-                 <div className="bg-[var(--card-bg)] p-3 rounded-xl border border-[var(--glass-border)] text-center">
-                    <p className="text-[10px] uppercase tracking-wider text-[var(--muted-foreground)] mb-1">Session</p>
-                    <p className="font-bold text-lg">{completedSummary.startSoc}% → {completedSummary.endSoc}%</p>
-                 </div>
-                 <div className="bg-[var(--card-bg)] p-3 rounded-xl border border-[var(--glass-border)] text-center">
-                    <p className="text-[10px] uppercase tracking-wider text-[var(--muted-foreground)] mb-1">Time Elapsed</p>
-                    <p className="font-bold text-lg">{completedSummary.timeMins} mins</p>
-                 </div>
-               </div>
-               
-               <div className="bg-[var(--card-bg)] p-4 rounded-xl border border-[var(--glass-border)] space-y-3">
-                  <div className="flex justify-between items-center border-b border-[var(--glass-border)] pb-2">
-                    <span className="text-sm text-[var(--muted-foreground)]">Range Added</span>
-                    <span className="font-mono font-bold text-green-500">+{completedSummary.rangeGained} {rangeUnit}</span>
-                  </div>
-                  <div className="flex justify-between items-center border-b border-[var(--glass-border)] pb-2">
-                    <span className="text-sm text-[var(--muted-foreground)]">Energy Delivered</span>
-                    <span className="font-mono font-bold">{completedSummary.energy} kWh</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-[var(--muted-foreground)]">Total Cost</span>
-                    <span className="font-mono font-bold text-red-400">{currency}{completedSummary.cost}</span>
-                  </div>
-               </div>
-            </div>
-            
-            <div className="p-6 mt-2">
+            <div className="p-4 grid grid-cols-2 gap-3 border-t border-green-500/20 bg-[#0a0a0a] relative z-30 font-sans">
+              <button 
+                onClick={handleShare}
+                disabled={isSharing}
+                className="w-full py-3 bg-green-500/10 text-green-400 font-bold rounded-xl border border-green-500/30 hover:bg-green-500/20 transition-all flex justify-center items-center gap-2"
+              >
+                {isSharing ? <Clock3 className="w-5 h-5 animate-spin" /> : <Share2 className="w-5 h-5" />}
+                {isSharing ? "Generating..." : "Share Receipt"}
+              </button>
               <button 
                 onClick={() => setCompletedSummary(null)}
-                className="w-full py-3 bg-primary text-primary-foreground font-bold rounded-xl hover:opacity-90 transition-opacity"
+                className="w-full py-3 bg-green-500 text-[#0a0a0a] font-bold rounded-xl hover:bg-green-400 transition-all"
               >
-                Okay, got it
+                Done
               </button>
             </div>
           </div>
