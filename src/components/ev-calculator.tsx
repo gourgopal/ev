@@ -342,18 +342,17 @@ export default function EVChargingCalculator({
 
 
   useEffect(() => {
-    if (!result || isSimulating) return;
     const interval = setInterval(() => {
-      setLcdScreenIndex((prev) => (prev === 0 ? 1 : 0));
+      setLcdScreenIndex((prev) => (prev + 1) % 3);
     }, 4000);
     return () => clearInterval(interval);
-  }, [result, isSimulating]);
+  }, []);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       <div className="flex flex-col-reverse lg:grid lg:grid-cols-12 gap-8">
         {/* Left Column: Inputs */}
-        <div className="lg:col-span-7 space-y-6">
+        <div className="lg:col-span-6 space-y-6">
           {/* Vehicle Details */}
           <div className="bg-[#0a0a0a] border border-green-500/30 p-6 rounded-3xl text-green-400 font-mono shadow-[0_0_20px_rgba(34,197,94,0.1)] relative">
             <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
@@ -775,7 +774,7 @@ export default function EVChargingCalculator({
         </div>
 
         {/* Right Column: Results Dashboard (Unified LED Screen) */}
-        <div className="lg:col-span-5">
+        <div className="lg:col-span-6">
           <div className="rounded-3xl p-6 lg:p-8 lg:sticky lg:top-24 flex flex-col h-[550px] lg:h-full lg:min-h-[650px] space-y-4 lg:space-y-6 bg-[#0a0a0a] text-green-400 border border-green-500/30 relative overflow-hidden ring-1 ring-green-500/20 shadow-[0_0_40px_rgba(34,197,94,0.15)] font-mono">
             {/* LCD Screen Lines Effect */}
             <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(255,255,255,0)_50%,rgba(0,0,0,1)_50%)] bg-[length:100%_4px] z-20"></div>
@@ -800,23 +799,23 @@ export default function EVChargingCalculator({
                  
                  {/* Navigation Chevrons */}
                  <button 
-                   onClick={() => setLcdScreenIndex(0)} 
-                   className={`absolute left-0 top-1/2 -translate-y-1/2 z-20 p-2 text-green-500 hover:text-green-300 transition-all ${lcdScreenIndex === 0 ? 'opacity-0 pointer-events-none' : 'opacity-50 hover:opacity-100'}`}
+                   onClick={() => setLcdScreenIndex((prev) => (prev - 1 + 3) % 3)} 
+                   className={`absolute left-0 top-1/2 -translate-y-1/2 z-20 p-2 text-green-500 hover:text-green-300 transition-all ${false ? '' : 'opacity-50 hover:opacity-100'}`}
                  >
                    <ChevronLeft className="w-8 h-8" />
                  </button>
                  
                  <button 
-                   onClick={() => setLcdScreenIndex(1)} 
-                   className={`absolute right-0 top-1/2 -translate-y-1/2 z-20 p-2 text-green-500 hover:text-green-300 transition-all ${lcdScreenIndex === 1 ? 'opacity-0 pointer-events-none' : 'opacity-50 hover:opacity-100'}`}
+                   onClick={() => setLcdScreenIndex((prev) => (prev + 1) % 3)} 
+                   className={`absolute right-0 top-1/2 -translate-y-1/2 z-20 p-2 text-green-500 hover:text-green-300 transition-all ${false ? '' : 'opacity-50 hover:opacity-100'}`}
                  >
                    <ChevronRight className="w-8 h-8" />
                  </button>
 
-                 <div className="flex w-[200%] transition-transform duration-500 ease-in-out" style={{ transform: `translateX(-${lcdScreenIndex * 50}%)` }}>
+                 <div className="flex w-[300%] transition-transform duration-500 ease-in-out" style={{ transform: `translateX(-${lcdScreenIndex * 33.333}%)` }}>
                    
                    {/* SLIDE 1: Main Stats */}
-                   <div className="w-1/2 flex flex-col items-center justify-center space-y-4 shrink-0">
+                   <div className="w-1/3 flex flex-col items-center justify-center space-y-4 shrink-0">
                      <div className={`text-[90px] md:text-[140px] font-black text-transparent bg-clip-text leading-none drop-shadow-[0_0_15px_rgba(74,222,128,0.5)] font-[family-name:var(--font-share-tech-mono)] ${isSimulating ? "bg-gradient-to-b from-amber-300 to-amber-600" : "bg-gradient-to-b from-green-300 to-green-600"}`}>
                        {isSimulating ? (
                          <>{Math.floor(simSoc)}<span className="text-4xl md:text-5xl">{(simSoc % 1).toFixed(2).substring(1)}%</span></>
@@ -848,7 +847,7 @@ export default function EVChargingCalculator({
                    </div>
 
                    {/* SLIDE 2: Detailed Stats */}
-                   <div className="w-1/2 flex flex-col items-center justify-center p-4 shrink-0 font-[family-name:var(--font-share-tech-mono)]">
+                   <div className="w-1/3 flex flex-col items-center justify-center p-4 shrink-0 font-[family-name:var(--font-share-tech-mono)]">
                       {result ? (
                         <div className="w-full max-w-sm space-y-4">
                            <div className="bg-green-950/20 border border-green-500/20 rounded-xl p-4">
