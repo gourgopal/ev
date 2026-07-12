@@ -876,8 +876,8 @@ export default function EVChargingCalculator({
                         </div>
                       ) : (
                         <div className="text-green-500/50">Awaiting simulation data...</div>
-                      )}                       </div>
-                     </div>
+                      )}
+                   </div>
 
                    {/* SLIDE 3: Charging Progress (Time Elapsed/Remaining) */}
                    <div className="w-1/3 flex flex-col items-center justify-center px-4 shrink-0">
@@ -922,12 +922,13 @@ export default function EVChargingCalculator({
                              })() : (result ? (result.hrs > 0 ? `${result.hrs}h ${result.mins}m` : `${result.mins}m`) : "0m")}
                            </span>
                          </div>
+                         </div>
                        </div>
                      </div>
                    </div>
                 </div>
 
-              {/* Details Modal */}
+                {/* Details Modal */}
               {showDetailsModal && result && (
                 <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200 font-mono">
                   <div className="bg-[#0a0a0a] border border-green-500/30 rounded-3xl w-full max-w-lg shadow-[0_0_50px_rgba(34,197,94,0.1)] overflow-hidden flex flex-col relative text-green-400 max-h-[90vh]">
