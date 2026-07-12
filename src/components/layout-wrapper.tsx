@@ -3,7 +3,7 @@
 import { useAuth } from "./auth-provider";
 import { PremiumDialog } from "./premium-dialog";
 import { useState } from "react";
-import { User } from "lucide-react";
+import { User, Zap, BatteryCharging } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FEATURE_FLAGS } from "@/lib/config";
@@ -24,9 +24,23 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
         {/* Left Ad Banner */}
         {FEATURE_FLAGS.ENABLE_ADS && !isPremium && (
           <div className="hidden 2xl:flex w-[300px] flex-col items-center justify-start pt-24 px-4 sticky top-0 h-screen shrink-0">
-             <div className="w-full h-[600px] bg-[var(--card-bg)] border border-[var(--glass-border)] rounded-xl flex items-center justify-center text-[var(--muted-foreground)] text-sm shadow-sm text-center p-4 relative overflow-hidden group">
-                <span className="relative z-10">Left Ad Space<br/>(160x600 or 300x600)</span>
-                <button onClick={() => setShowPremiumDialog(true)} className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-amber-500 hover:underline opacity-0 group-hover:opacity-100 transition-opacity">Remove Ads</button>
+             <div className="w-full bg-[var(--card-bg)] border border-[var(--glass-border)] rounded-xl shadow-sm overflow-hidden relative group">
+                <div className="bg-gradient-to-br from-green-500/20 to-blue-500/20 h-40 flex items-center justify-center p-4">
+                   <div className="w-24 h-24 rounded-full bg-background/50 backdrop-blur border border-white/10 flex items-center justify-center">
+                     <Zap className="w-10 h-10 text-green-500" />
+                   </div>
+                </div>
+                <div className="p-5 text-center">
+                   <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 flex justify-center gap-1 items-center">
+                      <span className="w-2 h-2 bg-muted-foreground rounded-full"></span> Sponsored
+                   </div>
+                   <h3 className="font-bold text-lg leading-tight mb-2">Upgrade to Level 2 Charging</h3>
+                   <p className="text-sm text-muted-foreground mb-4">Charge up to 7x faster at home with Lectron's premium smart chargers.</p>
+                   <a href="#" className="inline-block w-full py-2 bg-primary text-primary-foreground font-semibold rounded-lg hover:opacity-90 transition-opacity">
+                     Shop Lectron
+                   </a>
+                </div>
+                <button onClick={() => setShowPremiumDialog(true)} className="absolute top-2 right-2 text-[10px] bg-background/50 backdrop-blur rounded px-2 py-1 text-amber-500 hover:bg-amber-500/10 opacity-0 group-hover:opacity-100 transition-all">Remove Ads</button>
              </div>
           </div>
         )}
@@ -34,9 +48,21 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
         <div className="flex-1 flex flex-col pb-24 min-w-0 w-full">
           {/* Top Ad Space Placeholder */}
           {FEATURE_FLAGS.ENABLE_ADS && !isPremium && (
-            <div className="w-full max-w-4xl mx-auto h-20 bg-[var(--card-bg)] border border-[var(--glass-border)] rounded-xl my-4 flex items-center justify-center text-[var(--muted-foreground)] text-sm shadow-sm hidden md:flex relative group">
-               <span>Ad Space Placeholder (728x90)</span>
-               <button onClick={() => setShowPremiumDialog(true)} className="absolute right-4 text-[10px] text-amber-500 hover:underline opacity-0 group-hover:opacity-100 transition-opacity">Remove Ads</button>
+            <div className="w-full max-w-4xl mx-auto bg-gradient-to-r from-blue-900/40 to-blue-600/20 border border-blue-500/30 rounded-xl my-4 p-4 flex flex-col md:flex-row items-center justify-between shadow-sm relative group overflow-hidden">
+               <div className="flex items-center gap-4 z-10">
+                 <div className="bg-blue-500/20 p-2 rounded-lg">
+                   <BatteryCharging className="w-6 h-6 text-blue-400" />
+                 </div>
+                 <div>
+                   <h4 className="font-bold text-sm text-blue-100">Need a Tesla to J1772 Adapter?</h4>
+                   <p className="text-xs text-blue-200/70">Access 15,000+ Destination Chargers with A2Z EV.</p>
+                 </div>
+               </div>
+               <a href="#" className="mt-3 md:mt-0 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold rounded-lg transition-colors z-10">
+                 View Deals
+               </a>
+               <span className="absolute top-2 right-2 text-[8px] uppercase text-blue-300/50">Sponsored</span>
+               <button onClick={() => setShowPremiumDialog(true)} className="absolute bottom-2 right-2 text-[10px] text-amber-500 hover:underline opacity-0 group-hover:opacity-100 transition-opacity z-20 bg-background/80 px-2 rounded">Remove Ads</button>
             </div>
           )}
           
@@ -54,9 +80,23 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
         {/* Right Ad Banner */}
         {FEATURE_FLAGS.ENABLE_ADS && !isPremium && (
           <div className="hidden 2xl:flex w-[300px] flex-col items-center justify-start pt-24 px-4 sticky top-0 h-screen shrink-0">
-             <div className="w-full h-[600px] bg-[var(--card-bg)] border border-[var(--glass-border)] rounded-xl flex items-center justify-center text-[var(--muted-foreground)] text-sm shadow-sm text-center p-4 relative group">
-                <span className="relative z-10">Right Ad Space<br/>(160x600 or 300x600)</span>
-                <button onClick={() => setShowPremiumDialog(true)} className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-amber-500 hover:underline opacity-0 group-hover:opacity-100 transition-opacity">Remove Ads</button>
+             <div className="w-full bg-[var(--card-bg)] border border-[var(--glass-border)] rounded-xl shadow-sm overflow-hidden relative group">
+                <div className="bg-gradient-to-br from-amber-500/20 to-orange-500/20 h-40 flex items-center justify-center p-4">
+                   <div className="w-24 h-24 rounded-full bg-background/50 backdrop-blur border border-white/10 flex items-center justify-center">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-500"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                   </div>
+                </div>
+                <div className="p-5 text-center">
+                   <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 flex justify-center gap-1 items-center">
+                      <span className="w-2 h-2 bg-muted-foreground rounded-full"></span> Sponsored
+                   </div>
+                   <h3 className="font-bold text-lg leading-tight mb-2">Premium EV Accessories</h3>
+                   <p className="text-sm text-muted-foreground mb-4">Floor mats, screen protectors, and organizers for your EV by EV Sportline.</p>
+                   <a href="#" className="inline-block w-full py-2 bg-amber-500 text-white font-semibold rounded-lg hover:bg-amber-600 transition-colors">
+                     Shop Accessories
+                   </a>
+                </div>
+                <button onClick={() => setShowPremiumDialog(true)} className="absolute top-2 right-2 text-[10px] bg-background/50 backdrop-blur rounded px-2 py-1 text-amber-500 hover:bg-amber-500/10 opacity-0 group-hover:opacity-100 transition-all">Remove Ads</button>
              </div>
           </div>
         )}

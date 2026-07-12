@@ -3,9 +3,11 @@
 import { EVProvider } from "@/components/ev-provider";
 import EVChargingCalculator from "@/components/ev-calculator";
 import { I18nProvider, useI18n } from "@/components/i18n-provider";
+import { EV_CARS } from "@/lib/ev-cars";
 
 function HomeContent() {
   const { t } = useI18n();
+  const defaultCar = EV_CARS.find(c => c.slug === "mahindra-be-6e-79kwh");
   return (
     <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] selection:bg-primary/30 pt-10 pb-20">
       <div className="container mx-auto max-w-6xl px-4">
@@ -13,7 +15,7 @@ function HomeContent() {
          <EVProvider>
            {/* Calculator Section */}
            <section id="calculator" className="scroll-mt-8">
-              <EVChargingCalculator />
+              <EVChargingCalculator initialCar={defaultCar} />
            </section>
          </EVProvider>
       </div>

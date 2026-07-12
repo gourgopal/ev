@@ -37,7 +37,7 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
   const [customRange, setCustomRange] = useState<number | string>(initialCar?.range || 263);
   const [startSoc, setStartSoc] = useState<number | string>(20);
   const [endSoc, setEndSoc] = useState<number | string>(100);
-  const [chargerKw, setChargerKw] = useState<number | string>(7.2);
+  const [chargerKw, setChargerKw] = useState<number | string>(30);
   const [efficiency, setEfficiency] = useState<number | string>(90);
   const [curveType, setCurveType] = useState<"conservative" | "aggressive" | "linear">("conservative");
   const [rangeUnit, setRangeUnit] = useState<"km" | "miles">(initialCar?.rangeUnit || "km");
@@ -91,14 +91,26 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Smart defaults for charger cost
+  // Smart defaults for charger cost and petrol based on currency
   useEffect(() => {
-    if (Number(chargerKw) <= 11) {
-      setCostPerKwh(8); // Home AC
-    } else {
-      setCostPerKwh(24); // Fast DC
+    const kw = Number(chargerKw);
+    if (currency === '₹') {
+      setPetrolPrice(110);
+      setCostPerKwh(kw <= 11 ? 8 : 24);
+    } else if (currency === '$') {
+      setPetrolPrice(1.20);
+      setCostPerKwh(kw <= 11 ? 0.15 : 0.45);
+    } else if (currency === '€') {
+      setPetrolPrice(1.70);
+      setCostPerKwh(kw <= 11 ? 0.25 : 0.60);
+    } else if (currency === '£') {
+      setPetrolPrice(1.50);
+      setCostPerKwh(kw <= 11 ? 0.22 : 0.55);
+    } else if (currency === '¥') {
+      setPetrolPrice(170);
+      setCostPerKwh(kw <= 11 ? 30 : 80);
     }
-  }, [chargerKw]);
+  }, [chargerKw, currency]);
 
   const filteredCars = EV_CARS.filter(car => 
     `${car.brand} ${car.model}`.toLowerCase().includes(searchQuery.toLowerCase())

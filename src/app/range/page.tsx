@@ -21,7 +21,7 @@ function RangeCalculatorContent() {
   
   // Conditions
   const [temperature, setTemperature] = useState<number>(20); // Celsius
-  const [speed, setSpeed] = useState<"city" | "mixed" | "highway">("mixed");
+  const [constantSpeed, setConstantSpeed] = useState<number>(60); // km/h or mph
   const [climateControl, setClimateControl] = useState<"off" | "eco" | "max">("eco");
   const [payload, setPayload] = useState<number>(1); // Number of passengers
   const [headlights, setHeadlights] = useState<boolean>(false);
@@ -59,12 +59,15 @@ function RangeCalculatorContent() {
       multiplier *= 0.90; // Severe heat requires AC for battery cooling
     }
 
-    // 2. Speed Impact
-    if (speed === "highway") {
-      multiplier *= 0.85; // Aerodynamic drag increases at high speed
-    } else if (speed === "city") {
-      multiplier *= 1.10; // Regenerative braking helps in stop-and-go
-    }
+    // 2. Speed Impact (Aerodynamic Drag Physics)
+    // Drag increases with the square of velocity.
+    // EVs are most efficient around 40-50 km/h.
+    // Let's use a parabolic efficiency curve centered around 45 km/h.
+    const speedVal = rangeUnit === 'miles' ? constantSpeed * 1.609 : constantSpeed; // normalize to km/h for math
+    // 1.25 max multiplier at 45km/h. Drops off exponentially at higher speeds.
+    const dragLoss = Math.pow(Math.max(0, speedVal - 45), 2) / 9000;
+    const speedMultiplier = 1.25 - dragLoss;
+    multiplier *= Math.max(0.4, speedMultiplier); // Cap max loss at 60%
 
     // 3. Climate Control
     if (climateControl === "max") {
@@ -92,6 +95,10 @@ function RangeCalculatorContent() {
 
   const actualRange = calculateRange();
   const efficiencyLoss = 100 - Math.round((actualRange / baseRange) * 100);
+  
+  // Calculate resulting Wh/km
+  const batteryCapacity = selectedCar?.capacity || 40.5;
+  const resultingWhPerUnit = Math.round((batteryCapacity * 1000) / actualRange);
 
   return (
     <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] selection:bg-primary/30 pt-8 pb-32">
@@ -197,17 +204,20 @@ function RangeCalculatorContent() {
                </div>
 
                <div>
-                 <label className="block text-sm font-medium mb-3">Driving Speed</label>
-                 <div className="grid grid-cols-3 gap-3">
-                   {['city', 'mixed', 'highway'].map((s) => (
-                     <button 
-                       key={s}
-                       onClick={() => setSpeed(s as any)}
-                       className={`py-2 rounded-lg text-sm font-semibold capitalize border transition-all ${speed === s ? 'bg-primary text-white border-primary shadow-lg shadow-primary/30' : 'bg-[var(--background)]/50 border-[var(--glass-border)] text-[var(--muted-foreground)] hover:border-primary/50'}`}
-                     >
-                       {s}
-                     </button>
-                   ))}
+                 <div className="flex justify-between items-center mb-2">
+                    <label className="block text-sm font-medium flex items-center gap-2"><Navigation className="w-4 h-4 text-purple-500" /> Constant Speed</label>
+                    <span className="font-mono bg-[var(--background)] px-2 py-1 rounded text-sm">{constantSpeed} {rangeUnit === 'km' ? 'km/h' : 'mph'}</span>
+                 </div>
+                 <input 
+                    type="range" min="30" max="140" step="1"
+                    value={constantSpeed}
+                    onChange={(e) => setConstantSpeed(Number(e.target.value))}
+                    className="w-full accent-primary"
+                 />
+                 <div className="flex justify-between text-xs text-[var(--muted-foreground)] mt-1">
+                    <span>30 {rangeUnit === 'km' ? 'km/h' : 'mph'} (City)</span>
+                    <span>60 (Eco Cruise)</span>
+                    <span>140 (Highway)</span>
                  </div>
                </div>
 
@@ -295,6 +305,11 @@ function RangeCalculatorContent() {
                       <span className="font-mono font-bold">100% Matches Claimed</span>
                     </div>
                   )}
+                  
+                  <div className="bg-blue-500/10 p-4 rounded-xl border border-blue-500/20 flex justify-between items-center">
+                    <span className="text-sm text-blue-500 dark:text-blue-400">Real-World Efficiency</span>
+                    <span className="font-mono font-bold text-blue-500 dark:text-blue-400">{resultingWhPerUnit} Wh/{rangeUnit}</span>
+                  </div>
                 </div>
 
              </div>

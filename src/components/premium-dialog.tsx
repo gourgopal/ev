@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "./auth-provider";
 import { X, Crown, CheckCircle2, Shield, Zap } from "lucide-react";
 
@@ -12,8 +12,24 @@ interface PremiumDialogProps {
 export function PremiumDialog({ isOpen, onClose }: PremiumDialogProps) {
   const { user, isPremium, signInWithGoogle, signOut, upgradeToPremium } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [countryCode, setCountryCode] = useState<string>("US");
+
+  useEffect(() => {
+    if (isOpen) {
+      fetch('https://ipapi.co/json/')
+        .then(res => res.json())
+        .then(data => {
+          if (data.country_code) {
+             setCountryCode(data.country_code);
+          }
+        })
+        .catch(err => console.error("IP lookup failed", err));
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
+
+  const isIndia = countryCode === "IN";
 
   const handleUpgrade = async () => {
     setIsProcessing(true);
@@ -106,10 +122,10 @@ export function PremiumDialog({ isOpen, onClose }: PremiumDialogProps) {
                   onClick={handleUpgrade}
                   className="w-full py-3 rounded-lg font-bold bg-amber-500 text-white hover:bg-amber-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(245,158,11,0.3)]"
                 >
-                  {isProcessing ? "Processing..." : !user ? "Login to Upgrade" : "Go Ad-Free for $4.99/mo"}
+                  {isProcessing ? "Processing..." : !user ? "Login to Upgrade" : isIndia ? "Go Ad-Free for ₹99/mo" : "Go Ad-Free for $4.99/mo"}
                 </button>
                 <div className="flex justify-center items-center gap-1 text-[10px] text-[var(--muted-foreground)] mt-2">
-                  <Shield className="w-3 h-3" /> Secure payment via Stripe
+                  <Shield className="w-3 h-3" /> {isIndia ? "Secure payment via Razorpay" : "Secure payment via Stripe"}
                 </div>
               </div>
             )}
