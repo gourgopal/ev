@@ -16,7 +16,8 @@ import {
   TrendingDown, 
   Clock3,
   X,
-  History
+  History,
+  SignalHigh
 } from "lucide-react";
 import { EV_CARS, EVCar } from "@/lib/ev-cars";
 
@@ -34,7 +35,7 @@ type ChargeHistoryItem = {
 export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCar }) {
   const [capacity, setCapacity] = useState<number | string>(initialCar?.capacity || 40.5);
   const [customRange, setCustomRange] = useState<number | string>(initialCar?.range || 263);
-  const [startSoc, setStartSoc] = useState<number | string>(10);
+  const [startSoc, setStartSoc] = useState<number | string>(20);
   const [endSoc, setEndSoc] = useState<number | string>(100);
   const [chargerKw, setChargerKw] = useState<number | string>(7.2);
   const [efficiency, setEfficiency] = useState<number | string>(90);
@@ -399,7 +400,10 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2"><Activity className="text-primary w-5 h-5"/> Grid & Economics</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                <div>
-                  <label className="block text-sm font-medium mb-1">Charger Output (kW)</label>
+                  <label className="flex items-center gap-1 text-sm font-medium mb-1 w-max group relative cursor-help">
+                    Charger Output (kW) <Info className="w-3.5 h-3.5 text-[var(--muted-foreground)]" />
+                    <span className="absolute bottom-full left-0 mb-2 w-48 p-2 bg-black/90 backdrop-blur-sm text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">Power delivered by the charger (e.g. 7.2 for Home AC, 50 for Fast DC).</span>
+                  </label>
                   <input
                     type="number" step="0.1"
                     value={chargerKw}
@@ -408,7 +412,10 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Electricity Cost ({currency}/kWh)</label>
+                  <label className="flex items-center gap-1 text-sm font-medium mb-1 w-max group relative cursor-help">
+                    Electricity Cost ({currency}/kWh) <Info className="w-3.5 h-3.5 text-[var(--muted-foreground)]" />
+                    <span className="absolute bottom-full left-0 mb-2 w-48 p-2 bg-black/90 backdrop-blur-sm text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">Your home electricity tariff or public charging rate.</span>
+                  </label>
                   <input
                     type="number" step="0.1"
                     value={costPerKwh}
@@ -417,7 +424,10 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Petrol/ICE Cost ({currency}/L)</label>
+                  <label className="flex items-center gap-1 text-sm font-medium mb-1 w-max group relative cursor-help">
+                    Petrol/ICE Cost ({currency}/L) <Info className="w-3.5 h-3.5 text-[var(--muted-foreground)]" />
+                    <span className="absolute bottom-full left-0 mb-2 w-48 p-2 bg-black/90 backdrop-blur-sm text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">Current price of petrol or diesel in your area.</span>
+                  </label>
                   <input
                     type="number" step="1"
                     value={petrolPrice}
@@ -426,7 +436,10 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">ICE Efficiency ({rangeUnit}/L)</label>
+                  <label className="flex items-center gap-1 text-sm font-medium mb-1 w-max group relative cursor-help">
+                    ICE Efficiency ({rangeUnit}/L) <Info className="w-3.5 h-3.5 text-[var(--muted-foreground)]" />
+                    <span className="absolute bottom-full left-0 mb-2 w-48 p-2 bg-black/90 backdrop-blur-sm text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">Average mileage of a comparable internal combustion engine car.</span>
+                  </label>
                   <input
                     type="number" step="1"
                     value={iceEfficiency}
@@ -538,45 +551,93 @@ export default function EVChargingCalculator({ initialCar }: { initialCar?: EVCa
         {/* Right Column: Results Dashboard */}
         <div className="lg:col-span-5">
           {isSimulating ? (
-            <div className="glass-panel p-6 lg:p-8 sticky top-24 flex flex-col h-full min-h-[500px] space-y-8 bg-black/90 text-white border-primary/50 relative overflow-hidden ring-1 ring-primary/50 shadow-[0_0_50px_rgba(var(--primary-rgb),0.1)]">
-               <div className="absolute inset-0 bg-primary/5 animate-pulse"></div>
-               <div className="relative z-10 flex flex-col h-full items-center justify-center space-y-8">
-                  <h2 className="text-2xl font-bold flex items-center gap-2 text-primary">
-                    <BatteryCharging className="w-8 h-8 animate-pulse" /> Live Charging
-                  </h2>
-                  
-                  <div className="text-8xl font-black font-mono text-transparent bg-clip-text bg-gradient-to-br from-primary to-blue-400 pb-4 pr-4 leading-none">
-                     {simSoc}%
+            <div className="rounded-3xl p-6 lg:p-8 sticky top-24 flex flex-col h-full min-h-[600px] space-y-6 bg-[#0a0a0a] text-green-400 border border-green-500/30 relative overflow-hidden ring-1 ring-green-500/20 shadow-[0_0_40px_rgba(34,197,94,0.15)] font-mono">
+               
+               {/* LCD Screen Lines Effect */}
+               <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(255,255,255,0)_50%,rgba(0,0,0,1)_50%)] bg-[length:100%_4px] z-20"></div>
+               
+               <div className="relative z-10 flex flex-col h-full items-center justify-between">
+                  {/* Top Bar */}
+                  <div className="w-full flex justify-between items-center text-xs tracking-widest text-green-500/70 border-b border-green-500/20 pb-4">
+                    <span className="flex items-center gap-2"><SignalHigh className="w-4 h-4" /> STATION: ONLINE</span>
+                    <span className="animate-pulse">● SESSION ACTIVE</span>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-6 w-full mt-8">
-                     <div className="bg-white/10 p-4 rounded-2xl backdrop-blur-md text-center border border-white/10">
-                        <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">Range Gained</p>
-                        <p className="text-2xl font-bold font-mono">+{Math.round(((simSoc - Number(startSoc)) / 100) * Number(customRange))} {rangeUnit}</p>
+                  {/* Main LCD Display */}
+                  <div className="relative w-full flex-grow flex items-center justify-center group cursor-crosshair">
+                     {/* Circular Glow */}
+                     <div className="absolute w-64 h-64 bg-green-500/5 rounded-full blur-3xl opacity-50"></div>
+                     
+                     {/* The SoC Text */}
+                     <div className="text-[120px] font-black text-transparent bg-clip-text bg-gradient-to-b from-green-300 to-green-600 drop-shadow-[0_0_15px_rgba(74,222,128,0.5)] leading-none transition-transform duration-500 group-hover:scale-90 group-hover:opacity-10">
+                        {simSoc}<span className="text-6xl">%</span>
                      </div>
-                     <div className="bg-white/10 p-4 rounded-2xl backdrop-blur-md text-center border border-white/10">
-                        <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">Current Speed</p>
-                        <p className="text-2xl font-bold font-mono">{chargerKw} kW</p>
-                     </div>
-                     <div className="bg-white/10 p-4 rounded-2xl backdrop-blur-md text-center border border-white/10 col-span-2">
-                        <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">Estimated Cost</p>
-                        <p className="text-2xl font-bold font-mono text-red-400">{currency}{(((simSoc - Number(startSoc)) / 100) * Number(capacity) / (Number(efficiency)/100) * Number(costPerKwh)).toFixed(2)}</p>
+                     
+                     {/* Hover overlay 2D Animation */}
+                     <div className="absolute inset-0 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10">
+                        {/* LED bar */}
+                        <div className="w-3/4 h-8 bg-black border border-green-500/30 rounded-full p-1 mb-6 relative overflow-hidden">
+                           <div 
+                             className="h-full bg-gradient-to-r from-green-600 to-green-400 rounded-full shadow-[0_0_10px_rgba(74,222,128,0.8)] transition-all duration-300 ease-out relative"
+                             style={{ width: `${simSoc}%` }}
+                           >
+                              <div className="absolute right-0 top-0 bottom-0 w-4 bg-white/30 animate-pulse"></div>
+                           </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-x-8 gap-y-4 text-center">
+                           <div>
+                             <p className="text-[10px] text-green-500/60 uppercase">Speed</p>
+                             <p className="text-xl">{chargerKw} kW</p>
+                           </div>
+                           <div>
+                             <p className="text-[10px] text-green-500/60 uppercase">Time Elapsed</p>
+                             <p className="text-xl">
+                               {Math.floor(((((simSoc - Number(startSoc)) / 100) * Number(capacity) / (Number(efficiency)/100)) / (Number(chargerKw) * (Number(efficiency)/100))) * 60)} m
+                             </p>
+                           </div>
+                           <div className="col-span-2">
+                             <p className="text-[10px] text-green-500/60 uppercase">Energy Drawn</p>
+                             <p className="text-xl text-green-300">{((simSoc - Number(startSoc)) / 100 * Number(capacity)).toFixed(1)} kWh</p>
+                           </div>
+                        </div>
                      </div>
                   </div>
                   
-                  <div className="flex-grow" />
+                  {/* Bottom Stats Panel */}
+                  <div className="w-full grid grid-cols-2 gap-4 border-t border-green-500/20 pt-6">
+                     <div className="bg-green-950/30 p-4 rounded-xl border border-green-500/10">
+                        <p className="text-[10px] text-green-500/60 uppercase mb-1">Range Gained</p>
+                        <p className="text-2xl font-bold">+{Math.round(((simSoc - Number(startSoc)) / 100) * Number(customRange))} <span className="text-sm font-normal text-green-500/60">{rangeUnit}</span></p>
+                     </div>
+                     <div className="bg-green-950/30 p-4 rounded-xl border border-green-500/10">
+                        <p className="text-[10px] text-green-500/60 uppercase mb-1">Total Range</p>
+                        <p className="text-2xl font-bold">{Math.round((simSoc / 100) * Number(customRange))} <span className="text-sm font-normal text-green-500/60">{rangeUnit}</span></p>
+                     </div>
+                     <div className="bg-green-950/30 p-4 rounded-xl border border-green-500/10 col-span-2 flex justify-between items-end">
+                        <div>
+                           <p className="text-[10px] text-green-500/60 uppercase mb-1">Est. Cost</p>
+                           <p className="text-3xl font-bold text-amber-400 drop-shadow-[0_0_10px_rgba(251,191,36,0.3)]">{currency}{(((simSoc - Number(startSoc)) / 100) * Number(capacity) / (Number(efficiency)/100) * Number(costPerKwh)).toFixed(2)}</p>
+                        </div>
+                        <div className="text-right">
+                           <p className="text-[10px] text-green-500/60 uppercase mb-1">Input Power</p>
+                           <p className="text-xl text-green-400">{chargerKw} kW</p>
+                        </div>
+                     </div>
+                  </div>
                   
-                  <div className="grid grid-cols-2 gap-4 w-full">
+                  {/* Controls */}
+                  <div className="grid grid-cols-2 gap-4 w-full mt-6">
                     <button 
                       onClick={togglePause}
-                      className="w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 transition-all"
+                      className="w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 transition-all font-sans"
                     >
                       {isPaused ? <PlayCircle className="w-5 h-5" /> : <Clock3 className="w-5 h-5" />}
                       {isPaused ? "Resume" : "Pause"}
                     </button>
                     <button 
                       onClick={toggleSimulation}
-                      className="w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white transition-all shadow-[0_0_20px_rgba(239,68,68,0.4)]"
+                      className="w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition-all font-sans shadow-[0_0_20px_rgba(239,68,68,0.1)]"
                     >
                       <StopCircle className="w-5 h-5 animate-pulse" /> Stop
                     </button>

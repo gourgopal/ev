@@ -6,6 +6,7 @@ import { useState } from "react";
 import { User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { FEATURE_FLAGS } from "@/lib/config";
 
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const { isPremium, user } = useAuth();
@@ -21,7 +22,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
     <>
       <div className="flex min-h-screen relative max-w-[1600px] mx-auto">
         {/* Left Ad Banner */}
-        {!isPremium && (
+        {FEATURE_FLAGS.ENABLE_ADS && !isPremium && (
           <div className="hidden 2xl:flex w-[300px] flex-col items-center justify-start pt-24 px-4 sticky top-0 h-screen shrink-0">
              <div className="w-full h-[600px] bg-[var(--card-bg)] border border-[var(--glass-border)] rounded-xl flex items-center justify-center text-[var(--muted-foreground)] text-sm shadow-sm text-center p-4 relative overflow-hidden group">
                 <span className="relative z-10">Left Ad Space<br/>(160x600 or 300x600)</span>
@@ -32,7 +33,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
 
         <div className="flex-1 flex flex-col pb-24 min-w-0 w-full">
           {/* Top Ad Space Placeholder */}
-          {!isPremium && (
+          {FEATURE_FLAGS.ENABLE_ADS && !isPremium && (
             <div className="w-full max-w-4xl mx-auto h-20 bg-[var(--card-bg)] border border-[var(--glass-border)] rounded-xl my-4 flex items-center justify-center text-[var(--muted-foreground)] text-sm shadow-sm hidden md:flex relative group">
                <span>Ad Space Placeholder (728x90)</span>
                <button onClick={() => setShowPremiumDialog(true)} className="absolute right-4 text-[10px] text-amber-500 hover:underline opacity-0 group-hover:opacity-100 transition-opacity">Remove Ads</button>
@@ -42,7 +43,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
           {children}
           
           {/* Bottom Ad Space Placeholder */}
-          {!isPremium && (
+          {FEATURE_FLAGS.ENABLE_ADS && !isPremium && (
             <div className="w-full max-w-4xl mx-auto h-20 bg-[var(--card-bg)] border border-[var(--glass-border)] rounded-xl my-4 mt-12 flex items-center justify-center text-[var(--muted-foreground)] text-sm shadow-sm relative group">
                <span>Ad Space Placeholder (Responsive)</span>
                <button onClick={() => setShowPremiumDialog(true)} className="absolute right-4 text-[10px] text-amber-500 hover:underline opacity-0 group-hover:opacity-100 transition-opacity">Remove Ads</button>
@@ -51,7 +52,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Right Ad Banner */}
-        {!isPremium && (
+        {FEATURE_FLAGS.ENABLE_ADS && !isPremium && (
           <div className="hidden 2xl:flex w-[300px] flex-col items-center justify-start pt-24 px-4 sticky top-0 h-screen shrink-0">
              <div className="w-full h-[600px] bg-[var(--card-bg)] border border-[var(--glass-border)] rounded-xl flex items-center justify-center text-[var(--muted-foreground)] text-sm shadow-sm text-center p-4 relative group">
                 <span className="relative z-10">Right Ad Space<br/>(160x600 or 300x600)</span>
@@ -88,10 +89,12 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
            </Link>
            
            {/* Account / Premium Button */}
-           <button onClick={() => setShowPremiumDialog(true)} className="text-[var(--muted-foreground)] hover:text-amber-500 transition-colors flex flex-col items-center gap-1">
-             <User className={`w-6 h-6 ${isPremium ? 'text-amber-500' : ''}`} />
-             <span className={`text-[10px] font-semibold ${isPremium ? 'text-amber-500' : ''}`}>{user ? 'PRO' : 'Login'}</span>
-           </button>
+           {FEATURE_FLAGS.ENABLE_PRO && (
+             <button onClick={() => setShowPremiumDialog(true)} className="text-[var(--muted-foreground)] hover:text-amber-500 transition-colors flex flex-col items-center gap-1">
+               <User className={`w-6 h-6 ${isPremium ? 'text-amber-500' : ''}`} />
+               <span className={`text-[10px] font-semibold ${isPremium ? 'text-amber-500' : ''}`}>{user ? 'PRO' : 'Login'}</span>
+             </button>
+           )}
         </nav>
       </div>
 
