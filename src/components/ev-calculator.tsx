@@ -340,6 +340,15 @@ export default function EVChargingCalculator({
     }
   };
 
+
+  useEffect(() => {
+    if (!result || isSimulating) return;
+    const interval = setInterval(() => {
+      setLcdScreenIndex((prev) => (prev === 0 ? 1 : 0));
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [result, isSimulating]);
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       <div className="flex flex-col-reverse lg:grid lg:grid-cols-12 gap-8">
@@ -787,7 +796,7 @@ export default function EVChargingCalculator({
               </div>
 
               {/* Main LCD Display & Unified Results (Sliding Carousel) */}
-              <div className="flex-grow flex flex-col items-center justify-center py-6 space-y-4 md:space-y-6 relative overflow-hidden group">
+              <div className="flex-grow flex flex-col items-center justify-center py-6 relative overflow-hidden group w-full">
                  
                  {/* Navigation Chevrons */}
                  <button 
