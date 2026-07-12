@@ -1,14 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import html2canvas from "html2canvas";
 import { EV_CARS, EVCar } from "@/lib/ev-cars";
-import { ChevronDown, Search, Thermometer, Wind, Zap, Navigation, Users, Lightbulb, Music, Battery, Map, Settings2 } from "lucide-react";
+import { ChevronDown, Search, Thermometer, Wind, Zap, Navigation, Users, Lightbulb, Music, Battery, Map, Settings2, Share2, Gauge, CircleDashed } from "lucide-react";
 import { I18nProvider, useI18n } from "@/components/i18n-provider";
 
 function RangeCalculatorContent() {
   const { t } = useI18n();
   const [searchQuery, setSearchQuery] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const shareRef = useRef<HTMLDivElement>(null);
+  const [isSharing, setIsSharing] = useState(false);
   
   // Defaults to a popular car (e.g., Tata Nexon EV or Tesla Model 3)
   const defaultCar = EV_CARS.find(c => c.brand === "Tesla" && c.model === "Model 3 (Long Range)") || EV_CARS[0];
@@ -26,9 +29,11 @@ function RangeCalculatorContent() {
   const [payload, setPayload] = useState<number>(1); // Number of passengers
   const [headlights, setHeadlights] = useState<boolean>(false);
   const [music, setMusic] = useState<boolean>(true);
-  const [batteryAge, setBatteryAge] = useState<number>(0);
+  const [odo, setOdo] = useState<number>(0);
   const [roadCondition, setRoadCondition] = useState<"flat" | "uphill" | "bad_road" | "rain_snow">("flat");
   const [cruiseControl, setCruiseControl] = useState<boolean>(false);
+  const [tyreCondition, setTyreCondition] = useState<"optimal" | "worn" | "underinflated">("optimal");
+  const [currentBatteryPct, setCurrentBatteryPct] = useState<number>(85);
 
   const filteredCars = EV_CARS.filter(car => 
     `${car.brand} ${car.model}`.toLowerCase().includes(searchQuery.toLowerCase())
@@ -95,12 +100,18 @@ function RangeCalculatorContent() {
     if (roadCondition === "bad_road") multiplier *= 0.90; // 10% loss
     if (roadCondition === "rain_snow") multiplier *= 0.85; // 15% loss
 
-    // 6. Battery Degradation
-    if (batteryAge > 0) {
-      multiplier *= Math.pow(0.985, batteryAge); // 1.5% loss per year compounding
+    // 6. Battery Degradation via Odo
+    if (odo > 0) {
+      const odoKm = rangeUnit === 'miles' ? odo * 1.609 : odo;
+      const degradationFactor = Math.pow(0.985, odoKm / 20000);
+      multiplier *= Math.max(0.7, degradationFactor); // Cap at 30% degradation max
     }
 
-    // 7. Auxiliaries
+    // 7. Tyre Condition
+    if (tyreCondition === "worn") multiplier *= 0.95;
+    if (tyreCondition === "underinflated") multiplier *= 0.90;
+
+    // 8. Auxiliaries
     if (headlights) {
       multiplier *= 0.98; // ~2% loss
     }
@@ -117,6 +128,47 @@ function RangeCalculatorContent() {
   // Calculate resulting Wh/km
   const batteryCapacity = selectedCar?.capacity || 40.5;
   const resultingWhPerUnit = Math.round((batteryCapacity * 1000) / actualRange);
+
+  const batteryHealth = odo > 0 ? Math.max(70, Math.round(Math.pow(0.985, (rangeUnit === 'miles' ? odo * 1.609 : odo) / 20000) * 100)) : 100;
+  
+  const currentRange = Math.round((currentBatteryPct / 100) * actualRange);
+  const range80to20 = Math.round(0.60 * actualRange);
+  const range100to20 = Math.round(0.80 * actualRange);
+
+  const handleShare = async () => {
+    if (!shareRef.current) return;
+    setIsSharing(true);
+    try {
+      const canvas = await html2canvas(shareRef.current, {
+        backgroundColor: document.documentElement.classList.contains('dark') ? '#0f172a' : '#ffffff',
+        scale: 2,
+      });
+      const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/png'));
+      if (!blob) throw new Error("Could not create image blob");
+      
+      const file = new File([blob], 'ev-range-estimate.png', { type: 'image/png' });
+      
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          title: 'EV Range Estimate',
+          text: `Here is the realistic range breakdown for the ${selectedCar?.brand} ${selectedCar?.model}!`,
+          files: [file]
+        });
+      } else {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'ev-range-estimate.png';
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Sharing failed. Try again.");
+    } finally {
+      setIsSharing(false);
+    }
+  };
 
   return (
     <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] selection:bg-primary/30 pt-8 pb-32">
@@ -142,8 +194,15 @@ function RangeCalculatorContent() {
                       onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                       className="w-full text-left bg-[var(--background)] border border-[var(--glass-border)] rounded-xl px-4 py-3 flex items-center justify-between hover:border-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20"
                     >
-                      <span className="truncate">{selectedCar ? `${selectedCar.brand} ${selectedCar.model}` : "Select a car"}</span>
-                      <ChevronDown className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                      <div className="flex items-center justify-between w-full pr-2">
+                        <span className="truncate w-4/5 font-medium">{selectedCar ? `${selectedCar.brand} ${selectedCar.model}` : "Select a car"}</span>
+                        {selectedCar && (
+                          <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-md shrink-0 font-semibold">
+                            {selectedCar.capacity} kWh
+                          </span>
+                        )}
+                      </div>
+                      <ChevronDown className={`w-4 h-4 transition-transform shrink-0 ${isDropdownOpen ? 'rotate-180' : ''}`} />
                     </button>
                     
                     {isDropdownOpen && (
@@ -168,8 +227,11 @@ function RangeCalculatorContent() {
                               onClick={() => handleCarSelect(car)}
                               className="w-full text-left px-3 py-2 rounded-lg hover:bg-primary/10 transition-colors flex justify-between items-center"
                             >
-                              <span className="font-semibold text-sm">{car.brand} {car.model}</span>
-                              <span className="text-xs text-[var(--muted-foreground)]">{car.range} {car.rangeUnit}</span>
+                              <span className="font-semibold text-sm truncate w-4/5">{car.brand} {car.model}</span>
+                              <div className="flex flex-col items-end shrink-0">
+                                <span className="text-[10px] font-bold bg-primary/10 text-primary px-1.5 py-0.5 rounded">{car.capacity} kWh</span>
+                                <span className="text-[10px] text-[var(--muted-foreground)] mt-0.5">{car.range} {car.rangeUnit}</span>
+                              </div>
                             </button>
                           ))}
                         </div>
@@ -232,11 +294,18 @@ function RangeCalculatorContent() {
                     onChange={(e) => setConstantSpeed(Number(e.target.value))}
                     className="w-full accent-primary"
                  />
-                 <div className="flex justify-between text-xs text-[var(--muted-foreground)] mt-1">
+                 <div className="flex justify-between text-xs text-[var(--muted-foreground)] mt-1 mb-4">
                     <span>30 {rangeUnit === 'km' ? 'km/h' : 'mph'} (City)</span>
                     <span>60 (Eco Cruise)</span>
                     <span>140 (Highway)</span>
                  </div>
+
+                 <button 
+                   onClick={() => setCruiseControl(!cruiseControl)}
+                   className={`w-full py-2.5 rounded-lg text-sm font-semibold border transition-all flex items-center justify-center gap-2 ${cruiseControl ? 'bg-primary text-white border-primary shadow-lg shadow-primary/30' : 'bg-[var(--background)]/50 border-[var(--glass-border)] text-[var(--muted-foreground)] hover:border-primary/50'}`}
+                 >
+                   <Settings2 className="w-4 h-4" /> Cruise Control (Eco)
+                 </button>
                </div>
 
                <div>
@@ -269,15 +338,19 @@ function RangeCalculatorContent() {
 
                <div>
                   <div className="flex justify-between items-center mb-2">
-                    <label className="text-sm font-medium flex items-center gap-2"><Battery className="w-4 h-4 text-green-500" /> Battery Age</label>
-                    <span className="font-mono bg-[var(--background)] px-2 py-1 rounded text-sm">{batteryAge} Years</span>
+                    <label className="text-sm font-medium flex items-center gap-2"><Gauge className="w-4 h-4 text-green-500" /> Odometer ({rangeUnit})</label>
+                    <span className="font-mono bg-[var(--background)] px-2 py-1 rounded text-sm">{odo.toLocaleString()}</span>
                   </div>
                   <input 
-                    type="range" min="0" max="15" step="1"
-                    value={batteryAge}
-                    onChange={(e) => setBatteryAge(Number(e.target.value))}
+                    type="range" min="0" max="250000" step="5000"
+                    value={odo}
+                    onChange={(e) => setOdo(Number(e.target.value))}
                     className="w-full accent-primary"
                   />
+                  <div className="text-xs mt-2 flex justify-between">
+                     <span className="text-[var(--muted-foreground)]">Est. Battery Health:</span>
+                     <span className={`font-semibold ${batteryHealth < 80 ? 'text-orange-500' : 'text-green-500'}`}>{batteryHealth}%</span>
+                  </div>
                </div>
 
                <div>
@@ -295,9 +368,24 @@ function RangeCalculatorContent() {
                  </div>
                </div>
 
+               <div>
+                 <label className="block text-sm font-medium mb-3 flex items-center gap-2"><CircleDashed className="w-4 h-4 text-orange-400" /> Tyre Condition</label>
+                 <div className="grid grid-cols-3 gap-3">
+                   {['optimal', 'worn', 'underinflated'].map((c) => (
+                     <button 
+                       key={c}
+                       onClick={() => setTyreCondition(c as any)}
+                       className={`py-2 rounded-lg text-xs font-semibold capitalize border transition-all ${tyreCondition === c ? 'bg-primary text-white border-primary shadow-lg shadow-primary/30' : 'bg-[var(--background)]/50 border-[var(--glass-border)] text-[var(--muted-foreground)] hover:border-primary/50'}`}
+                     >
+                       {c === 'underinflated' ? 'Low Pres.' : c}
+                     </button>
+                   ))}
+                 </div>
+               </div>
+
                <div className="pt-4 border-t border-[var(--glass-border)]">
                  <label className="block text-sm font-medium mb-3">Auxiliaries & Features</label>
-                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                 <div className="grid grid-cols-2 gap-4">
                     <button 
                        onClick={() => setHeadlights(!headlights)}
                        className={`py-3 rounded-lg text-sm font-semibold border transition-all flex items-center justify-center gap-2 ${headlights ? 'bg-primary text-white border-primary shadow-lg shadow-primary/30' : 'bg-[var(--background)]/50 border-[var(--glass-border)] text-[var(--muted-foreground)] hover:border-primary/50'}`}
@@ -309,12 +397,6 @@ function RangeCalculatorContent() {
                        className={`py-3 rounded-lg text-sm font-semibold border transition-all flex items-center justify-center gap-2 ${music ? 'bg-primary text-white border-primary shadow-lg shadow-primary/30' : 'bg-[var(--background)]/50 border-[var(--glass-border)] text-[var(--muted-foreground)] hover:border-primary/50'}`}
                      >
                        <Music className="w-4 h-4" /> Music System
-                     </button>
-                     <button 
-                       onClick={() => setCruiseControl(!cruiseControl)}
-                       className={`py-3 rounded-lg text-sm font-semibold border transition-all flex items-center justify-center gap-2 ${cruiseControl ? 'bg-primary text-white border-primary shadow-lg shadow-primary/30' : 'bg-[var(--background)]/50 border-[var(--glass-border)] text-[var(--muted-foreground)] hover:border-primary/50'}`}
-                     >
-                       <Settings2 className="w-4 h-4" /> Cruise (Eco)
                      </button>
                  </div>
                </div>
@@ -362,6 +444,62 @@ function RangeCalculatorContent() {
                     <span className="text-sm text-blue-500 dark:text-blue-400">Real-World Efficiency</span>
                     <span className="font-mono font-bold text-blue-500 dark:text-blue-400">{resultingWhPerUnit} Wh/{rangeUnit}</span>
                   </div>
+                </div>
+
+                {/* Shareable Battery Breakdown Block */}
+                <div className="mt-8 pt-8 border-t border-[var(--glass-border)]">
+                  <h3 className="text-lg font-bold mb-4 flex items-center gap-2"><Battery className="w-5 h-5 text-primary" /> Range Breakdown</h3>
+                  
+                  <div className="mb-4">
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-[var(--muted-foreground)]">Current Battery</span>
+                      <span className="font-bold">{currentBatteryPct}%</span>
+                    </div>
+                    <input 
+                      type="range" min="5" max="100" step="1"
+                      value={currentBatteryPct}
+                      onChange={(e) => setCurrentBatteryPct(Number(e.target.value))}
+                      className="w-full accent-primary"
+                    />
+                  </div>
+
+                  <div ref={shareRef} className="bg-[var(--background)] border border-[var(--glass-border)] rounded-2xl p-5 space-y-4">
+                     <div className="flex justify-between items-end border-b border-[var(--glass-border)] pb-4">
+                       <div>
+                         <div className="text-xs text-[var(--muted-foreground)] font-semibold uppercase tracking-wider mb-1">Range at {currentBatteryPct}%</div>
+                         <div className="text-4xl font-black text-primary">{currentRange} <span className="text-lg text-[var(--muted-foreground)]">{rangeUnit}</span></div>
+                       </div>
+                       <div className="text-right">
+                         <div className="text-[10px] text-[var(--muted-foreground)] uppercase">Max (100%)</div>
+                         <div className="text-xl font-bold">{actualRange} {rangeUnit}</div>
+                       </div>
+                     </div>
+
+                     <div className="grid grid-cols-2 gap-4 pt-2">
+                       <div className="bg-[var(--card-bg)] rounded-xl p-3 border border-[var(--glass-border)] text-center">
+                          <div className="text-xs text-[var(--muted-foreground)] mb-1">100% → 20%</div>
+                          <div className="text-lg font-bold">{range100to20} {rangeUnit}</div>
+                       </div>
+                       <div className="bg-[var(--card-bg)] rounded-xl p-3 border border-[var(--glass-border)] text-center">
+                          <div className="text-xs text-[var(--muted-foreground)] mb-1">80% → 20%</div>
+                          <div className="text-lg font-bold">{range80to20} {rangeUnit}</div>
+                       </div>
+                     </div>
+
+                     <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-3 text-xs text-blue-600 dark:text-blue-400 flex items-start gap-2">
+                       <Lightbulb className="w-4 h-4 shrink-0 mt-0.5" />
+                       <p><strong>Pro Tip:</strong> To maximize battery lifespan, keep your charge between 20% and 80% for daily city driving.</p>
+                     </div>
+                  </div>
+
+                  <button 
+                    onClick={handleShare}
+                    disabled={isSharing}
+                    className="w-full mt-4 bg-primary text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors disabled:opacity-50"
+                  >
+                    <Share2 className="w-5 h-5" />
+                    {isSharing ? "Generating..." : "Share Details"}
+                  </button>
                 </div>
 
              </div>
