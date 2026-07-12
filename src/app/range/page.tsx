@@ -463,6 +463,22 @@ function RangeCalculatorContent() {
                   </div>
 
                   <div ref={shareRef} className="bg-[var(--background)] border border-[var(--glass-border)] rounded-2xl p-5 space-y-4">
+                     <div className="mb-2 pb-4 border-b border-[var(--glass-border)]">
+                        <div className="flex justify-between items-start">
+                          <h4 className="font-bold text-lg">{selectedCar?.brand} {selectedCar?.model}</h4>
+                          <span className="text-xs font-bold bg-primary/10 text-primary px-2 py-1 rounded-md shrink-0">
+                            {selectedCar?.capacity} kWh
+                          </span>
+                        </div>
+                        <div className="text-[10px] text-[var(--muted-foreground)] flex flex-wrap gap-2 mt-3">
+                          <span className="bg-[var(--card-bg)] px-2 py-1 rounded border border-[var(--glass-border)]">ODO: {odo.toLocaleString()} {rangeUnit}</span>
+                          <span className="bg-[var(--card-bg)] px-2 py-1 rounded border border-[var(--glass-border)]">{temperature}°C</span>
+                          <span className="bg-[var(--card-bg)] px-2 py-1 rounded border border-[var(--glass-border)]">{constantSpeed} {rangeUnit === 'km' ? 'km/h' : 'mph'}</span>
+                          <span className="bg-[var(--card-bg)] px-2 py-1 rounded border border-[var(--glass-border)] capitalize">{roadCondition.replace('_', ' ')}</span>
+                          <span className="bg-[var(--card-bg)] px-2 py-1 rounded border border-[var(--glass-border)]">{payload} Person</span>
+                        </div>
+                     </div>
+
                      <div className="flex justify-between items-end border-b border-[var(--glass-border)] pb-4">
                        <div>
                          <div className="text-xs text-[var(--muted-foreground)] font-semibold uppercase tracking-wider mb-1">Range at {currentBatteryPct}%</div>
@@ -489,6 +505,10 @@ function RangeCalculatorContent() {
                        <Lightbulb className="w-4 h-4 shrink-0 mt-0.5" />
                        <p><strong>Pro Tip:</strong> To maximize battery lifespan, keep your charge between 20% and 80% for daily city driving.</p>
                      </div>
+                     
+                     <p className="text-[9px] text-[var(--muted-foreground)]/70 text-center leading-relaxed pt-2">
+                       * Disclaimer: Real-world range may vary significantly based on driving style, traffic, weather, battery health, and payload. This is a physics-based estimate, not a guarantee.
+                     </p>
                   </div>
 
                   <button 
